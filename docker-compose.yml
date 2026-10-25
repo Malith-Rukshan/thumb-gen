@@ -4,7 +4,7 @@ services:
   thumb-gen:
     build: .
     ports:
-      - "3000:80"
+      - "${EXPOSE_PORT:-3000}:80"
     environment:
       - NODE_ENV=production
     restart: unless-stopped
