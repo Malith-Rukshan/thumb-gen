@@ -1,5 +1,5 @@
 # Build stage
-FROM oven/bun:1.3.14-alpine AS builder
+FROM oven/bun:1.4.4-alpine AS builder
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ COPY . .
 RUN bun run build
 
 # Production stage
-FROM nginx:1.30.6-alpine
+FROM nginx:1.31.0-alpine
 
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
