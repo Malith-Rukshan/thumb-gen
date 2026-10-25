@@ -141,7 +141,7 @@ docker run -p 3000:3000 thumb-gen
 
 #### Prerequisites
 
-- [Bun](https://bun.sh/) (recommended) or Node.js 18+
+- [Bun](https://bun.sh/) (recommended) or Node.js 22.12+
 - Git
 
 #### Setup
