@@ -2,15 +2,12 @@
   "buildCommand": "bun run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "installCommand": "bun install",
+  "installCommand": "bun install --frozen-lockfile",
   "devCommand": "bun run dev",
-  "routes": [
+  "rewrites": [
     {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [
@@ -22,16 +19,12 @@
           "value": "SAMEORIGIN"
         },
         {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        },
-        {
           "key": "X-Content-Type-Options",
           "value": "nosniff"
         },
         {
           "key": "Referrer-Policy",
-          "value": "no-referrer-when-downgrade"
+          "value": "strict-origin-when-cross-origin"
         },
         {
           "key": "Permissions-Policy",
@@ -40,18 +33,22 @@
       ]
     },
     {
-      "source": "/(.*\\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot))",
+      "source": "/assets/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
         }
       ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
     }
-  ],
-  "functions": {
-    "app/api/**/*.js": {
-      "runtime": "@vercel/node"
-    }
-  }
+  ]
 }

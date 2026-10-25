@@ -1,5 +1,7 @@
 <template>
-  <footer class="relative z-20 mt-auto border-t border-gray-200/70 bg-white/70 backdrop-blur-xl">
+  <footer
+    class="relative z-20 mt-auto border-t border-gray-200/70 bg-white/70 backdrop-blur-xl"
+  >
     <div class="container mx-auto px-4 py-12">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-10">
         <!-- About -->

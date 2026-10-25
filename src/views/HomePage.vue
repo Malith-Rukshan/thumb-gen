@@ -1,7 +1,9 @@
 <template>
   <div>
     <!-- Hero Section -->
-    <section class="relative z-10 container mx-auto px-4 pt-10 pb-12 lg:pt-16 lg:pb-20">
+    <section
+      class="relative z-10 container mx-auto px-4 pt-10 pb-12 lg:pt-16 lg:pb-20"
+    >
       <div class="text-center max-w-3xl mx-auto">
         <div class="flex items-center justify-center mb-8">
           <div class="relative animate-float">
@@ -18,19 +20,23 @@
         </div>
 
         <div
-          class="inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-1.5 mb-6 rounded-full bg-white/70 ring-1 ring-gray-200 backdrop-blur text-xs font-medium text-gray-600 shadow-sm"
+          class="inline-flex items-center justify-center gap-x-3 px-4 py-1.5 mb-6 rounded-full bg-white/70 ring-1 ring-gray-200 backdrop-blur text-xs font-medium text-gray-600 shadow-sm"
         >
           <span class="inline-flex items-center gap-1.5">
             <span class="relative flex size-2">
-              <span class="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping"></span>
-              <span class="relative inline-flex size-2 rounded-full bg-emerald-500"></span>
+              <span
+                class="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping"
+              ></span>
+              <span
+                class="relative inline-flex size-2 rounded-full bg-emerald-500"
+              ></span>
             </span>
             100% in your browser
           </span>
           <span class="text-gray-300">•</span>
           <span>No sign-up</span>
-          <span class="text-gray-300">•</span>
-          <span>Open source</span>
+          <span class="hidden sm:inline text-gray-300">•</span>
+          <span class="hidden sm:inline">Open source</span>
         </div>
 
         <h1
@@ -38,7 +44,9 @@
         >
           Thumb<span class="text-gradient">Gen</span>
         </h1>
-        <p class="text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+        <p
+          class="text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed"
+        >
           Generate beautiful thumbnails from videos, animations, images, and
           text — all in your browser.
         </p>
@@ -65,7 +73,9 @@
     <section id="tools" class="pb-16 pt-4">
       <div class="container mx-auto px-4">
         <div class="text-center mb-12">
-          <h2 class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
+          <h2
+            class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900"
+          >
             <a href="#tools">Available Tools</a>
           </h2>
           <p class="text-lg text-gray-600 max-w-2xl mx-auto mt-4">

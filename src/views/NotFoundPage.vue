@@ -14,7 +14,9 @@
       </div>
 
       <!-- Error Message -->
-      <h1 class="text-7xl font-extrabold tracking-tight text-gradient mb-4">404</h1>
+      <h1 class="text-7xl font-extrabold tracking-tight text-gradient mb-4">
+        404
+      </h1>
       <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
         Page Not Found
       </h2>
@@ -25,18 +27,11 @@
 
       <!-- Action Buttons -->
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <router-link
-          to="/"
-          class="btn btn-primary btn-lg"
-        >
+        <router-link to="/" class="btn btn-primary btn-lg">
           <Home class="w-5 h-5" />
           Go to Homepage
         </router-link>
-        <button
-          type="button"
-          @click="goBack"
-          class="btn btn-secondary btn-lg"
-        >
+        <button type="button" @click="goBack" class="btn btn-secondary btn-lg">
           <ArrowLeft class="w-5 h-5" />
           Go Back
         </button>

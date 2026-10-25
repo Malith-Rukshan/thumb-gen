@@ -14,7 +14,9 @@
         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto"
       >
         <!-- Privacy First -->
-        <div class="card p-6 text-center group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lifted)]">
+        <div
+          class="card p-6 text-center group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lifted)]"
+        >
           <div
             class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 bg-linear-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25 transition-transform duration-300 group-hover:scale-110"
           >
@@ -28,7 +30,9 @@
         </div>
 
         <!-- No Registration -->
-        <div class="card p-6 text-center group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lifted)]">
+        <div
+          class="card p-6 text-center group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lifted)]"
+        >
           <div
             class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 bg-linear-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25 transition-transform duration-300 group-hover:scale-110"
           >
@@ -43,7 +47,9 @@
         </div>
 
         <!-- Fast Processing -->
-        <div class="card p-6 text-center group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lifted)]">
+        <div
+          class="card p-6 text-center group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lifted)]"
+        >
           <div
             class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 bg-linear-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25 transition-transform duration-300 group-hover:scale-110"
           >
@@ -58,7 +64,9 @@
         </div>
 
         <!-- Multiple Formats -->
-        <div class="card p-6 text-center group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lifted)]">
+        <div
+          class="card p-6 text-center group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lifted)]"
+        >
           <div
             class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 bg-linear-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25 transition-transform duration-300 group-hover:scale-110"
           >
@@ -73,7 +81,9 @@
         </div>
 
         <!-- Batch Processing -->
-        <div class="card p-6 text-center group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lifted)]">
+        <div
+          class="card p-6 text-center group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lifted)]"
+        >
           <div
             class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 bg-linear-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25 transition-transform duration-300 group-hover:scale-110"
           >
@@ -86,7 +96,9 @@
         </div>
 
         <!-- Open Source -->
-        <div class="card p-6 text-center group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lifted)]">
+        <div
+          class="card p-6 text-center group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lifted)]"
+        >
           <div
             class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 bg-linear-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25 transition-transform duration-300 group-hover:scale-110"
           >
@@ -163,10 +175,7 @@
           </div>
 
           <div class="mt-6 text-center">
-            <button
-              @click="resetDemo"
-              class="btn btn-primary"
-            >
+            <button @click="resetDemo" class="btn btn-primary">
               Reload Demo
             </button>
           </div>

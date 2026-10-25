@@ -19,12 +19,28 @@ export function createCanvas(
   return { canvas, ctx };
 }
 
+/** Browsers only understand "image/jpeg"; "image/jpg" silently falls back to PNG. */
+export function formatToMime(format: ExportOptions["format"]): string {
+  return format === "jpg" ? "image/jpeg" : `image/${format}`;
+}
+
 export async function canvasToBlob(
   canvas: HTMLCanvasElement,
-  options: ExportOptions,
+  options: Pick<ExportOptions, "format" | "quality">,
 ): Promise<Blob> {
+  let source = canvas;
+
+  // JPEG has no alpha channel: flatten onto white so transparent areas don't turn black
+  if (options.format === "jpg") {
+    const { canvas: flat, ctx } = createCanvas(canvas.width, canvas.height);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, flat.width, flat.height);
+    ctx.drawImage(canvas, 0, 0);
+    source = flat;
+  }
+
   return new Promise((resolve, reject) => {
-    canvas.toBlob(
+    source.toBlob(
       (blob) => {
         if (blob) {
           resolve(blob);
@@ -32,7 +48,7 @@ export async function canvasToBlob(
           reject(new Error("Failed to convert canvas to blob"));
         }
       },
-      `image/${options.format}`,
+      formatToMime(options.format),
       options.quality / 100,
     );
   });

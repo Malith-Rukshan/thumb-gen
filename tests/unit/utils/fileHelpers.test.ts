@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatFileSize, formatDuration } from '@/utils/fileHelpers'
+import { formatFileSize, formatDuration, stripExtension } from '@/utils/fileHelpers'
 
 describe('fileHelpers', () => {
   describe('formatFileSize', () => {
@@ -63,6 +63,18 @@ describe('fileHelpers', () => {
     it('rounds decimal seconds', () => {
       expect(formatDuration(30.7)).toBe('0:31')
       expect(formatDuration(30.3)).toBe('0:30')
+    })
+  })
+
+  describe('stripExtension', () => {
+    it('removes only the last extension', () => {
+      expect(stripExtension('photo.png')).toBe('photo')
+      expect(stripExtension('my.photo.final.jpg')).toBe('my.photo.final')
+    })
+
+    it('keeps names without an extension and dotfiles intact', () => {
+      expect(stripExtension('README')).toBe('README')
+      expect(stripExtension('.env')).toBe('.env')
     })
   })
 })

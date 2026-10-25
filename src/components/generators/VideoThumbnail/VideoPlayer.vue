@@ -47,7 +47,7 @@
           <!-- Frame markers -->
           <div class="absolute inset-0 pointer-events-none">
             <div
-              v-for="frame in capturedFrames"
+              v-for="frame in frames"
               :key="frame.id"
               :style="{ left: `${(frame.timestamp / duration) * 100}%` }"
               class="absolute top-0 w-0.5 h-2 bg-blue-600"
@@ -63,6 +63,8 @@
           @click="previousFrame"
           class="p-2 text-gray-600 hover:text-gray-900 transition-colors"
           title="Previous frame"
+          type="button"
+          aria-label="Previous frame"
         >
           <ChevronLeftIcon class="w-5 h-5" />
         </button>
@@ -72,6 +74,8 @@
           @click="stepBackward"
           class="p-2 text-gray-600 hover:text-gray-900 transition-colors"
           title="Step backward 1s"
+          type="button"
+          aria-label="Back"
         >
           <SkipBackIcon class="w-5 h-5" />
         </button>
@@ -89,6 +93,8 @@
           @click="stepForward"
           class="p-2 text-gray-600 hover:text-gray-900 transition-colors"
           title="Step forward 1s"
+          type="button"
+          aria-label="Forward"
         >
           <SkipForwardIcon class="w-5 h-5" />
         </button>
@@ -98,6 +104,8 @@
           @click="nextFrame"
           class="p-2 text-gray-600 hover:text-gray-900 transition-colors"
           title="Next frame"
+          type="button"
+          aria-label="Next frame"
         >
           <ChevronRightIcon class="w-5 h-5" />
         </button>
@@ -121,6 +129,7 @@
           v-for="option in quickCaptureOptions"
           :key="option.label"
           @click="quickCapture(option.count, option.interval)"
+          :disabled="isCapturing"
           class="btn btn-secondary btn-sm"
         >
           {{ option.label }}
@@ -143,12 +152,16 @@ import {
 } from "@lucide/vue";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 import { formatDuration } from "@/utils/fileHelpers";
-// Removed import - will use inline capture
 import type { VideoFrame } from "@/types";
 
-defineProps<{
-  src: string;
-}>();
+withDefaults(
+  defineProps<{
+    src: string;
+    /** Captured frames owned by the parent, used for timeline markers */
+    frames?: VideoFrame[];
+  }>(),
+  { frames: () => [] },
+);
 
 const emit = defineEmits<{
   loaded: [duration: number];
@@ -161,7 +174,7 @@ const isLoading = ref(true);
 const isPlaying = ref(false);
 const duration = ref(0);
 const currentTime = ref(0);
-const capturedFrames = ref<VideoFrame[]>([]);
+const isCapturing = ref(false);
 
 const quickCaptureOptions = [
   { label: "Every 5s", count: -1, interval: 5 },
@@ -264,8 +277,8 @@ async function captureFrame() {
     // Draw the current frame
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Convert to data URL
-    const thumbnail = canvas.toDataURL("image/jpeg", 0.9);
+    // Keep frames lossless; the export step applies the chosen format/quality
+    const thumbnail = canvas.toDataURL("image/png");
 
     const frame: VideoFrame = {
       id: `frame-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
@@ -273,7 +286,6 @@ async function captureFrame() {
       thumbnail,
     };
 
-    capturedFrames.value.push(frame);
     emit("frameCaptured", frame);
   } catch (error) {
     console.error("Error capturing frame:", error);
@@ -285,54 +297,57 @@ async function captureFrame() {
   }
 }
 
+/** Seek and wait for the frame to be decoded (with a timeout so we never hang). */
+function seekTo(video: HTMLVideoElement, time: number): Promise<void> {
+  return new Promise((resolve) => {
+    const done = () => {
+      clearTimeout(timer);
+      video.removeEventListener("seeked", done);
+      resolve();
+    };
+    const timer = setTimeout(done, 3000);
+    video.addEventListener("seeked", done, { once: true });
+    video.currentTime = time;
+  });
+}
+
 async function quickCapture(count: number, interval: number) {
-  if (!videoRef.value) return;
+  if (!videoRef.value || isCapturing.value) return;
 
   const video = videoRef.value;
   const wasPlaying = !video.paused;
+  const lastTime = Math.max(0, duration.value - 0.1);
 
+  let timestamps: number[];
+  if (interval === -1 && count === 3) {
+    // Special case: Start, Middle, End
+    timestamps = [0, duration.value / 2, lastTime];
+  } else if (count === -1) {
+    // Capture at intervals throughout the video (0, n, 2n, ... up to the end)
+    const frameCount = Math.ceil(duration.value / interval);
+    timestamps = Array.from({ length: frameCount }, (_, i) => i * interval);
+  } else {
+    // Capture specific number of frames
+    timestamps = Array.from({ length: count }, (_, i) => i * interval);
+  }
+  // Clamp to the video length and drop duplicates (short videos)
+  timestamps = [...new Set(timestamps.map((t) => Math.min(t, lastTime)))];
+
+  isCapturing.value = true;
   if (wasPlaying) {
     video.pause();
   }
 
-  if (interval === -1 && count === 3) {
-    // Special case: Start, Middle, End
-    const timestamps = [0, duration.value / 2, duration.value - 0.1];
-
+  try {
     for (const timestamp of timestamps) {
-      video.currentTime = timestamp;
-      await new Promise((resolve) => {
-        video.onseeked = resolve;
-      });
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      await seekTo(video, timestamp);
       await captureFrame();
     }
-  } else if (count === -1) {
-    // Capture at intervals throughout the video
-    const frameCount = Math.floor(duration.value / interval);
-
-    for (let i = 0; i < frameCount; i++) {
-      video.currentTime = i * interval;
-      await new Promise((resolve) => {
-        video.onseeked = resolve;
-      });
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      await captureFrame();
+  } finally {
+    isCapturing.value = false;
+    if (wasPlaying) {
+      video.play();
     }
-  } else {
-    // Capture specific number of frames
-    for (let i = 0; i < count; i++) {
-      video.currentTime = i * interval;
-      await new Promise((resolve) => {
-        video.onseeked = resolve;
-      });
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      await captureFrame();
-    }
-  }
-
-  if (wasPlaying) {
-    video.play();
   }
 }
 

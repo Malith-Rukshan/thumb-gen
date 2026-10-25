@@ -2,7 +2,9 @@
   <div class="space-y-6">
     <!-- Header Section -->
     <div class="space-y-4">
-      <h2 class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">Text Thumbnail Generator</h2>
+      <h2 class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
+        Text Thumbnail Generator
+      </h2>
       <p class="text-lg text-gray-600 leading-relaxed">
         Design stunning text-based thumbnails with custom fonts, colors, and
         backgrounds. Perfect for social media posts, blog headers, and marketing
@@ -10,7 +12,9 @@
       </p>
 
       <!-- Use Cases -->
-      <div class="rounded-2xl p-5 space-y-2 bg-linear-to-br from-blue-50 to-indigo-50/70 ring-1 ring-blue-100">
+      <div
+        class="rounded-2xl p-5 space-y-2 bg-linear-to-br from-blue-50 to-indigo-50/70 ring-1 ring-blue-100"
+      >
         <h3 class="font-semibold text-gray-900 flex items-center gap-2">
           <svg
             class="w-5 h-5 text-blue-600"
@@ -194,10 +198,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-1"
                 >Direction</label
               >
-              <select
-                v-model="gradientDirection"
-                class="input"
-              >
+              <select v-model="gradientDirection" class="input">
                 <option value="to-bottom">Top to Bottom</option>
                 <option value="to-right">Left to Right</option>
                 <option value="to-bottom-right">Diagonal</option>
@@ -214,6 +215,7 @@
               title="Drop background image"
               subtitle="or click to browse"
               :formats="['PNG', 'JPG', 'WebP']"
+              paste
               @files="handleBackgroundImage"
             />
             <div v-if="backgroundImage">
@@ -256,10 +258,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-1"
                 >Font Family</label
               >
-              <select
-                v-model="fontFamily"
-                class="input"
-              >
+              <select v-model="fontFamily" class="input">
                 <option
                   v-for="font in availableFonts"
                   :key="font.value"
@@ -321,10 +320,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1"
                   >Font Weight</label
                 >
-                <select
-                  v-model="fontWeight"
-                  class="input"
-                >
+                <select v-model="fontWeight" class="input">
                   <option value="normal">Normal</option>
                   <option value="bold">Bold</option>
                   <option value="bolder">Bolder</option>
@@ -343,9 +339,7 @@
                   @click="textAlign = align"
                   :class="[
                     'flex-1 py-2 rounded-lg transition-colors',
-                    textAlign === align
-                      ? 'chip chip-active'
-                      : 'chip',
+                    textAlign === align ? 'chip chip-active' : 'chip',
                   ]"
                 >
                   {{ align.charAt(0).toUpperCase() + align.slice(1) }}
@@ -399,10 +393,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-1"
                 >Export Format</label
               >
-              <select
-                v-model="exportFormat"
-                class="input"
-              >
+              <select v-model="exportFormat" class="input">
                 <option value="png">PNG (Transparent)</option>
                 <option value="jpg">JPG (No transparency)</option>
                 <option value="webp">WebP</option>
@@ -423,15 +414,26 @@
               />
             </div>
 
-            <Button
-              @click="downloadImage"
-              variant="primary"
-              class="w-full"
-              :disabled="!textContent.trim()"
-            >
-              <DownloadIcon class="w-4 h-4 mr-2" />
-              Download Thumbnail
-            </Button>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <Button
+                @click="downloadImage"
+                variant="primary"
+                class="flex-1"
+                :disabled="!textContent.trim()"
+              >
+                <DownloadIcon class="w-4 h-4" />
+                Download Thumbnail
+              </Button>
+              <Button
+                @click="copyImage"
+                variant="secondary"
+                :disabled="!textContent.trim()"
+              >
+                <CheckIcon v-if="copied" class="w-4 h-4 text-emerald-600" />
+                <CopyIcon v-else class="w-4 h-4" />
+                {{ copied ? "Copied!" : "Copy" }}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -455,9 +457,13 @@ import {
   PaletteIcon,
   ImageIcon,
   DownloadIcon,
+  CheckIcon,
+  CopyIcon,
 } from "@lucide/vue";
 import DropZone from "@/components/common/DropZone.vue";
 import Button from "@/components/ui/Button.vue";
+import { canvasToBlob } from "@/utils/canvas";
+import { copyImageToClipboard, downloadFile } from "@/utils/fileHelpers";
 
 // Canvas settings
 const canvasRef = ref<HTMLCanvasElement>();
@@ -475,7 +481,7 @@ const backgroundBlur = ref(0);
 
 // Text settings
 const textContent = ref("Your Text Here");
-const fontFamily = ref("Inter");
+const fontFamily = ref("Inter Variable");
 const fontSize = ref(72);
 const lineHeight = ref(1.2);
 const textColor = ref("#ffffff");
@@ -503,7 +509,7 @@ const presetSizes = [
 
 // Available fonts
 const availableFonts = [
-  { name: "Inter", value: "Inter" },
+  { name: "Inter", value: "Inter Variable" },
   { name: "Arial", value: "Arial" },
   { name: "Helvetica", value: "Helvetica" },
   { name: "Times New Roman", value: "Times New Roman" },
@@ -532,7 +538,26 @@ const handleBackgroundImage = (files: File[]) => {
   }
 };
 
+// Background images are decoded once and reused across redraws
+let cachedBackground: { src: string; img: HTMLImageElement } | null = null;
+const getBackgroundImage = async (src: string) => {
+  if (cachedBackground?.src !== src) {
+    const img = new Image();
+    img.src = src;
+    await img.decode();
+    cachedBackground = { src, img };
+  }
+  return cachedBackground.img;
+};
+
+const fontString = () =>
+  `${fontWeight.value} ${fontSize.value}px "${fontFamily.value}", sans-serif`;
+
+// Each redraw gets a token so a slow (awaiting) redraw can't paint over a newer one
+let drawToken = 0;
+
 const drawCanvas = async () => {
+  const token = ++drawToken;
   await nextTick();
 
   const canvas = canvasRef.value;
@@ -540,6 +565,24 @@ const drawCanvas = async () => {
 
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
+
+  // Make sure web fonts are ready, otherwise the canvas silently uses a fallback
+  try {
+    await document.fonts?.load(fontString());
+  } catch {
+    // Ignore: fall back to whatever font is available
+  }
+
+  let bgImage: HTMLImageElement | null = null;
+  if (backgroundType.value === "image" && backgroundImage.value) {
+    try {
+      bgImage = await getBackgroundImage(backgroundImage.value);
+    } catch {
+      errorMessage.value = "Failed to load background image";
+    }
+  }
+
+  if (token !== drawToken) return;
 
   // Clear canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -573,49 +616,67 @@ const drawCanvas = async () => {
     gradient.addColorStop(1, gradientEnd.value);
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-  } else if (backgroundType.value === "image" && backgroundImage.value) {
-    const img = new Image();
-    img.onload = () => {
-      // Save context state
-      ctx.save();
+  } else if (bgImage) {
+    ctx.save();
 
-      // Apply blur if needed
-      if (backgroundBlur.value > 0) {
-        ctx.filter = `blur(${backgroundBlur.value}px)`;
-      }
+    // Apply blur if needed
+    if (backgroundBlur.value > 0) {
+      ctx.filter = `blur(${backgroundBlur.value}px)`;
+    }
 
-      // Calculate scaling to cover canvas
-      const scale = Math.max(
-        canvas.width / img.width,
-        canvas.height / img.height,
-      );
-      const scaledWidth = img.width * scale;
-      const scaledHeight = img.height * scale;
-      const x = (canvas.width - scaledWidth) / 2;
-      const y = (canvas.height - scaledHeight) / 2;
+    // Calculate scaling to cover canvas
+    const scale = Math.max(
+      canvas.width / bgImage.width,
+      canvas.height / bgImage.height,
+    );
+    const scaledWidth = bgImage.width * scale;
+    const scaledHeight = bgImage.height * scale;
+    const x = (canvas.width - scaledWidth) / 2;
+    const y = (canvas.height - scaledHeight) / 2;
 
-      ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
-
-      // Restore context state
-      ctx.restore();
-
-      // Draw text after image loads
-      drawText(ctx);
-    };
-    img.src = backgroundImage.value;
-    return; // Exit early, text will be drawn after image loads
+    ctx.drawImage(bgImage, x, y, scaledWidth, scaledHeight);
+    ctx.restore();
   }
 
-  // Draw text
   drawText(ctx);
+};
+
+/** Split text on explicit newlines, then word-wrap each paragraph to maxWidth. */
+const wrapLines = (
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+): string[] => {
+  const lines: string[] = [];
+  for (const paragraph of text.split("\n")) {
+    const words = paragraph.split(/\s+/).filter(Boolean);
+    if (words.length === 0) {
+      lines.push("");
+      continue;
+    }
+    let line = words[0];
+    for (const word of words.slice(1)) {
+      const candidate = `${line} ${word}`;
+      if (ctx.measureText(candidate).width <= maxWidth) {
+        line = candidate;
+      } else {
+        lines.push(line);
+        line = word;
+      }
+    }
+    lines.push(line);
+  }
+  return lines;
 };
 
 const drawText = (ctx: CanvasRenderingContext2D) => {
   const canvas = canvasRef.value;
   if (!canvas) return;
 
-  // Set font
-  ctx.font = `${fontWeight.value} ${fontSize.value}px ${fontFamily.value}`;
+  // Context state (shadow, stroke...) persists between redraws, so isolate it
+  ctx.save();
+
+  ctx.font = fontString();
   ctx.fillStyle = textColor.value;
   ctx.textAlign = textAlign.value;
   ctx.textBaseline = "middle";
@@ -631,19 +692,19 @@ const drawText = (ctx: CanvasRenderingContext2D) => {
   if (enableStroke.value) {
     ctx.strokeStyle = "#000000";
     ctx.lineWidth = 3;
+    ctx.lineJoin = "round";
   }
 
-  // Calculate text position
-  const lines = textContent.value.split("\n");
+  const padding = Math.max(50, canvas.width * 0.05);
+  const lines = wrapLines(ctx, textContent.value, canvas.width - padding * 2);
   const lineHeightPx = fontSize.value * lineHeight.value;
   const totalHeight = lines.length * lineHeightPx;
   const startY = (canvas.height - totalHeight) / 2 + lineHeightPx / 2;
 
   let x = canvas.width / 2;
-  if (textAlign.value === "left") x = 50;
-  if (textAlign.value === "right") x = canvas.width - 50;
+  if (textAlign.value === "left") x = padding;
+  if (textAlign.value === "right") x = canvas.width - padding;
 
-  // Draw each line
   lines.forEach((line, index) => {
     const y = startY + index * lineHeightPx;
 
@@ -652,29 +713,38 @@ const drawText = (ctx: CanvasRenderingContext2D) => {
     }
     ctx.fillText(line, x, y);
   });
+
+  ctx.restore();
 };
 
-const downloadImage = () => {
+const downloadImage = async () => {
   const canvas = canvasRef.value;
   if (!canvas) return;
 
-  canvas.toBlob(
-    (blob) => {
-      if (!blob) {
-        errorMessage.value = "Failed to generate image";
-        return;
-      }
+  try {
+    const blob = await canvasToBlob(canvas, {
+      format: exportFormat.value,
+      quality: exportQuality.value,
+    });
+    await downloadFile(blob, `text-thumbnail.${exportFormat.value}`);
+  } catch {
+    errorMessage.value = "Failed to generate image";
+  }
+};
 
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `text-thumbnail.${exportFormat.value}`;
-      a.click();
-      URL.revokeObjectURL(url);
-    },
-    `image/${exportFormat.value}`,
-    exportQuality.value / 100,
-  );
+const copied = ref(false);
+const copyImage = async () => {
+  const canvas = canvasRef.value;
+  if (!canvas) return;
+
+  try {
+    const blob = await canvasToBlob(canvas, { format: "png", quality: 100 });
+    await copyImageToClipboard(blob);
+    copied.value = true;
+    setTimeout(() => (copied.value = false), 2000);
+  } catch {
+    errorMessage.value = "Copying images isn't supported in this browser";
+  }
 };
 
 // Watch for changes and redraw

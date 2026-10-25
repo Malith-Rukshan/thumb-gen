@@ -2,7 +2,7 @@
   <div
     @drop="handleDrop"
     @dragover.prevent
-    @dragenter.prevent="isDragging = true"
+    @dragenter.prevent="handleDragEnter"
     @dragleave.prevent="handleDragLeave"
     :class="[
       'relative border-2 border-dashed rounded-xl transition-all duration-300 shadow-[0_0px_4px_rgba(0,0,0,0.1)]',
@@ -21,7 +21,15 @@
       class="hidden"
     />
 
-    <div @click="fileInput?.click()" class="p-8 lg:p-12 cursor-pointer">
+    <div
+      role="button"
+      tabindex="0"
+      :aria-label="title"
+      @click="fileInput?.click()"
+      @keydown.enter.self.prevent="fileInput?.click()"
+      @keydown.space.self.prevent="fileInput?.click()"
+      class="p-8 lg:p-12 cursor-pointer rounded-xl focus-visible:outline-offset-[-4px]"
+    >
       <div class="flex flex-col items-center justify-center space-y-4">
         <!-- Icon -->
         <div class="relative">
@@ -42,6 +50,13 @@
           <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">
             {{ subtitle }}
           </p>
+          <p v-if="paste" class="hidden sm:block text-xs text-gray-400 mt-2">
+            You can also paste with
+            <kbd
+              class="px-1.5 py-0.5 rounded-md bg-gray-100 ring-1 ring-gray-200 font-sans text-[11px] text-gray-600"
+              >{{ pasteShortcut }}</kbd
+            >
+          </p>
         </div>
 
         <!-- Supported formats -->
@@ -59,7 +74,8 @@
         </div>
 
         <!-- URL Input -->
-        <div v-if="allowUrl" class="w-full max-w-md">
+        <!-- .stop: typing in the URL box must not open the file picker -->
+        <div v-if="allowUrl" class="w-full max-w-md" @click.stop @keydown.stop>
           <div class="relative mt-4">
             <input
               v-model="urlInput"
@@ -89,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { onBeforeUnmount, onMounted, ref } from "vue";
 import type { Component } from "vue";
 import { LinkIcon } from "@lucide/vue";
 import LoadingSpinner from "./LoadingSpinner.vue";
@@ -104,6 +120,8 @@ const props = withDefaults(
     formats?: string[];
     showFormats?: boolean;
     allowUrl?: boolean;
+    /** Accept files pasted from the clipboard (Ctrl/Cmd+V) anywhere on the page */
+    paste?: boolean;
     className?: string;
   }>(),
   {
@@ -111,6 +129,7 @@ const props = withDefaults(
     formats: () => [],
     showFormats: true,
     allowUrl: false,
+    paste: false,
     multiple: false,
   },
 );
@@ -127,6 +146,25 @@ const isLoading = ref(false);
 const urlInput = ref("");
 const dragCounter = ref(0);
 
+const pasteShortcut =
+  typeof navigator !== "undefined" &&
+  /Mac|iPhone|iPad/.test(navigator.userAgent)
+    ? "⌘V"
+    : "Ctrl+V";
+
+// dragenter/dragleave fire for every child element, so count them
+function handleDragEnter() {
+  dragCounter.value++;
+  isDragging.value = true;
+}
+
+function handleDragLeave(_e: DragEvent) {
+  dragCounter.value = Math.max(0, dragCounter.value - 1);
+  if (dragCounter.value === 0) {
+    isDragging.value = false;
+  }
+}
+
 function handleDrop(e: DragEvent) {
   e.preventDefault();
   isDragging.value = false;
@@ -138,19 +176,51 @@ function handleDrop(e: DragEvent) {
   }
 }
 
-function handleDragLeave(_e: DragEvent) {
-  dragCounter.value--;
-  if (dragCounter.value === 0) {
-    isDragging.value = false;
-  }
-}
-
 function handleFileSelect(e: Event) {
   const input = e.target as HTMLInputElement;
   const files = Array.from(input.files || []);
+  // Reset so choosing the same file again still fires "change"
+  input.value = "";
   if (files.length > 0) {
     processFiles(files);
   }
+}
+
+function handlePaste(e: ClipboardEvent) {
+  // Don't hijack normal pasting into text fields
+  const target = e.target as HTMLElement | null;
+  if (target?.closest("input, textarea, select, [contenteditable='true']")) {
+    return;
+  }
+
+  const files = Array.from(e.clipboardData?.files || []);
+  if (files.length > 0) {
+    e.preventDefault();
+    processFiles(props.multiple ? files : files.slice(0, 1));
+    return;
+  }
+
+  // A pasted link works like the URL box
+  const text = e.clipboardData?.getData("text/plain")?.trim();
+  if (props.allowUrl && text && /^https?:\/\//i.test(text)) {
+    e.preventDefault();
+    urlInput.value = text;
+    handleUrlSubmit();
+  }
+}
+
+function matchesAccept(file: File, acceptedTypes: string[]): boolean {
+  const name = file.name.toLowerCase();
+  const type = file.type.toLowerCase();
+  return acceptedTypes.some((accepted) => {
+    if (accepted.startsWith(".")) {
+      return name.endsWith(accepted);
+    }
+    if (accepted.endsWith("/*")) {
+      return type.startsWith(accepted.slice(0, -1));
+    }
+    return type === accepted;
+  });
 }
 
 function processFiles(files: File[]) {
@@ -161,18 +231,16 @@ function processFiles(files: File[]) {
 
   // Validate file types if accept is specified
   if (props.accept) {
-    const acceptedTypes = props.accept.split(",").map((t) => t.trim());
-    const invalidFiles = files.filter((file) => {
-      return !acceptedTypes.some((type) => {
-        if (type.startsWith(".")) {
-          return file.name.endsWith(type);
-        }
-        return file.type.match(type);
-      });
-    });
+    const acceptedTypes = props.accept
+      .split(",")
+      .map((t) => t.trim().toLowerCase())
+      .filter(Boolean);
+    const invalidFile = files.find(
+      (file) => !matchesAccept(file, acceptedTypes),
+    );
 
-    if (invalidFiles.length > 0) {
-      emit("error", `Invalid file type: ${invalidFiles[0].name}`);
+    if (invalidFile) {
+      emit("error", `Invalid file type: ${invalidFile.name}`);
       return;
     }
   }
@@ -194,6 +262,14 @@ async function handleUrlSubmit() {
     isLoading.value = false;
   }
 }
+
+onMounted(() => {
+  if (props.paste) window.addEventListener("paste", handlePaste);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("paste", handlePaste);
+});
 </script>
 
 <style scoped>

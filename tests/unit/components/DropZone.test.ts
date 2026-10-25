@@ -151,4 +151,51 @@ describe('DropZone', () => {
     expect(wrapper.emitted('files')).toBeTruthy()
     expect(wrapper.emitted('files')?.[0]?.[0]).toEqual(mockFiles)
   })
+
+  it('clears the highlight after dragging in and back out', async () => {
+    const wrapper = mount(DropZone, {
+      props: { icon: ImageIcon, title: 'Drop files here' }
+    })
+
+    // dragenter/dragleave also fire for child elements
+    await wrapper.trigger('dragenter')
+    await wrapper.trigger('dragenter')
+    await wrapper.trigger('dragleave')
+    expect((wrapper.vm as any).isDragging).toBe(true)
+    await wrapper.trigger('dragleave')
+    expect((wrapper.vm as any).isDragging).toBe(false)
+  })
+
+  it('matches file extensions case-insensitively', async () => {
+    const wrapper = mount(DropZone, {
+      props: { icon: ImageIcon, title: 'Drop', accept: 'application/json,.json,.tgs' }
+    })
+    const files = [new File(['x'], 'STICKER.TGS', { type: '' })]
+    await wrapper.trigger('drop', { preventDefault: vi.fn(), dataTransfer: { files } })
+    expect(wrapper.emitted('files')?.[0]?.[0]).toEqual(files)
+    expect(wrapper.emitted('error')).toBeFalsy()
+  })
+
+  it('supports wildcard accept types and rejects others', async () => {
+    const wrapper = mount(DropZone, {
+      props: { icon: ImageIcon, title: 'Drop', accept: 'image/*' }
+    })
+    const bad = [new File(['x'], 'clip.mp4', { type: 'video/mp4' })]
+    await wrapper.trigger('drop', { preventDefault: vi.fn(), dataTransfer: { files: bad } })
+    expect(wrapper.emitted('error')?.[0]?.[0]).toContain('clip.mp4')
+
+    const good = [new File(['x'], 'pic.webp', { type: 'image/webp' })]
+    await wrapper.trigger('drop', { preventDefault: vi.fn(), dataTransfer: { files: good } })
+    expect(wrapper.emitted('files')?.[0]?.[0]).toEqual(good)
+  })
+
+  it('does not open the file picker when clicking the URL input', async () => {
+    const wrapper = mount(DropZone, {
+      props: { icon: ImageIcon, title: 'Drop', allowUrl: true }
+    })
+    const fileInput = wrapper.find('input[type="file"]').element as HTMLInputElement
+    const clickSpy = vi.spyOn(fileInput, 'click')
+    await wrapper.find('input[type="url"]').trigger('click')
+    expect(clickSpy).not.toHaveBeenCalled()
+  })
 })

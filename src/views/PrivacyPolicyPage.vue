@@ -1,15 +1,16 @@
 <template>
   <div class="container mx-auto px-4 py-8 max-w-4xl">
-    <router-link
-      to="/"
-      class="btn btn-ghost btn-sm -ml-3 mb-6"
-    >
+    <router-link to="/" class="btn btn-ghost btn-sm -ml-3 mb-6">
       <ArrowLeftIcon class="w-4 h-4" />
       Back to Home
     </router-link>
 
     <div class="prose prose-lg max-w-none">
-      <h1 class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900 mb-6">Privacy Policy</h1>
+      <h1
+        class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900 mb-6"
+      >
+        Privacy Policy
+      </h1>
 
       <p class="text-gray-600 mb-8">Last updated: May 26, 2025</p>
 
@@ -28,7 +29,9 @@
         <h2 class="text-2xl font-semibold text-gray-900 mb-4">
           Data Processing
         </h2>
-        <div class="rounded-2xl p-6 mb-4 bg-linear-to-br from-blue-50 to-indigo-50/70 ring-1 ring-blue-100">
+        <div
+          class="rounded-2xl p-6 mb-4 bg-linear-to-br from-blue-50 to-indigo-50/70 ring-1 ring-blue-100"
+        >
           <h3 class="font-semibold text-gray-900 mb-2">
             100% Client-Side Processing
           </h3>

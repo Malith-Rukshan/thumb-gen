@@ -3,15 +3,16 @@
     <!-- Lottie Container -->
     <div class="relative bg-gray-100 rounded-lg overflow-hidden">
       <div
-        ref="lottieContainer"
-        class="flex items-center justify-center"
-        :style="{
-          width: animationWidth + 'px',
-          height: animationHeight + 'px',
-          maxWidth: '100%',
-          margin: '0 auto',
-        }"
-      />
+        class="mx-auto"
+        :style="{ width: animationWidth + 'px', maxWidth: '100%' }"
+      >
+        <canvas
+          ref="lottieCanvas"
+          :width="animationWidth"
+          :height="animationHeight"
+          class="block w-full h-auto"
+        />
+      </div>
 
       <!-- Loading overlay -->
       <Transition name="fade">
@@ -50,7 +51,7 @@
           <!-- Frame markers -->
           <div class="absolute inset-0 pointer-events-none">
             <div
-              v-for="frame in capturedFrames"
+              v-for="frame in frames"
               :key="frame.id"
               :style="{ left: `${(frame.frame / totalFrames) * 100}%` }"
               class="absolute top-0 w-0.5 h-2 bg-blue-600"
@@ -66,6 +67,8 @@
           @click="previousFrame"
           class="p-2 text-gray-600 hover:text-gray-900 transition-colors"
           title="Previous frame"
+          type="button"
+          aria-label="Previous frame"
         >
           <ChevronLeftIcon class="w-5 h-5" />
         </button>
@@ -75,6 +78,8 @@
           @click="stepBackward"
           class="p-2 text-gray-600 hover:text-gray-900 transition-colors"
           title="Step backward 10 frames"
+          type="button"
+          aria-label="Back"
         >
           <SkipBackIcon class="w-5 h-5" />
         </button>
@@ -92,6 +97,8 @@
           @click="stepForward"
           class="p-2 text-gray-600 hover:text-gray-900 transition-colors"
           title="Step forward 10 frames"
+          type="button"
+          aria-label="Forward"
         >
           <SkipForwardIcon class="w-5 h-5" />
         </button>
@@ -101,6 +108,8 @@
           @click="nextFrame"
           class="p-2 text-gray-600 hover:text-gray-900 transition-colors"
           title="Next frame"
+          type="button"
+          aria-label="Next frame"
         >
           <ChevronRightIcon class="w-5 h-5" />
         </button>
@@ -116,9 +125,7 @@
             @click="setPlaybackSpeed(speed)"
             :class="[
               'px-2 py-1 text-sm rounded transition-colors',
-              playbackSpeed === speed
-                ? 'chip chip-active'
-                : 'chip',
+              playbackSpeed === speed ? 'chip chip-active' : 'chip',
             ]"
           >
             {{ speed }}x
@@ -144,6 +151,7 @@
           v-for="option in quickCaptureOptions"
           :key="option.label"
           @click="quickCapture(option.count, option.interval)"
+          :disabled="isCapturing"
           class="btn btn-secondary btn-sm"
         >
           {{ option.label }}
@@ -154,8 +162,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from "vue";
-import lottie, { type AnimationItem } from "lottie-web";
+import { ref, onMounted, onUnmounted, watch, nextTick } from "vue";
+import lottie, {
+  type AnimationConfigWithData,
+  type AnimationItem,
+} from "lottie-web";
 import {
   PlayIcon,
   PauseIcon,
@@ -169,9 +180,14 @@ import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 import { formatDuration } from "@/utils/fileHelpers";
 import type { LottieFrame } from "@/types";
 
-const props = defineProps<{
-  animationData: any;
-}>();
+const props = withDefaults(
+  defineProps<{
+    animationData: any;
+    /** Captured frames owned by the parent, used for timeline markers */
+    frames?: LottieFrame[];
+  }>(),
+  { frames: () => [] },
+);
 
 const emit = defineEmits<{
   loaded: [frames: number, duration: number];
@@ -179,7 +195,7 @@ const emit = defineEmits<{
   error: [error: string];
 }>();
 
-const lottieContainer = ref<HTMLDivElement>();
+const lottieCanvas = ref<HTMLCanvasElement>();
 const animation = ref<AnimationItem | null>(null);
 const isLoading = ref(true);
 const isPlaying = ref(false);
@@ -189,7 +205,7 @@ const currentTime = ref(0);
 const duration = ref(0);
 const frameRate = ref(30);
 const playbackSpeed = ref(1);
-const capturedFrames = ref<LottieFrame[]>([]);
+const isCapturing = ref(false);
 const animationWidth = ref(512);
 const animationHeight = ref(512);
 
@@ -202,30 +218,45 @@ const quickCaptureOptions = [
   { label: "Start, Middle, End", count: 3, interval: -1 },
 ];
 
-function initializeLottie() {
-  if (!lottieContainer.value || !props.animationData) return;
+async function initializeLottie() {
+  if (!lottieCanvas.value || !props.animationData) return;
 
   try {
     // Clean up previous animation
     if (animation.value) {
       animation.value.destroy();
     }
+    isPlaying.value = false;
 
-    animation.value = lottie.loadAnimation({
-      container: lottieContainer.value,
+    // Render into our own canvas at the animation's native size, so captures
+    // are full resolution regardless of screen size / devicePixelRatio
+    animationWidth.value = props.animationData.w || 512;
+    animationHeight.value = props.animationData.h || 512;
+    await nextTick();
+
+    const context = lottieCanvas.value.getContext("2d");
+    if (!context) throw new Error("Canvas 2D context unavailable");
+
+    // lottie-web's types demand `container`, but passing one makes it create
+    // (and auto-size) its own canvas; the canvas renderer accepts a bare context
+    const config = {
       renderer: "canvas",
       loop: true,
       autoplay: false,
       animationData: props.animationData,
-    });
+      rendererSettings: {
+        context,
+        clearCanvas: true,
+        dpr: 1,
+        preserveAspectRatio: "xMidYMid meet",
+      },
+    } as Omit<AnimationConfigWithData<"canvas">, "container">;
+    animation.value = lottie.loadAnimation(
+      config as AnimationConfigWithData<"canvas">,
+    );
 
     animation.value.addEventListener("DOMLoaded", () => {
       if (!animation.value) return;
-
-      // Get animation dimensions from the animation data
-      const animData = props.animationData;
-      animationWidth.value = animData.w || 512;
-      animationHeight.value = animData.h || 512;
 
       totalFrames.value = animation.value.totalFrames;
       frameRate.value = animation.value.frameRate;
@@ -253,9 +284,15 @@ function initializeLottie() {
   }
 }
 
-function handleSeek() {
+// goToAndStop pauses playback, so keep the play button in sync
+function goToFrame(frame: number) {
   if (!animation.value) return;
-  animation.value.goToAndStop(currentFrame.value, true);
+  animation.value.goToAndStop(frame, true);
+  isPlaying.value = false;
+}
+
+function handleSeek() {
+  goToFrame(currentFrame.value);
 }
 
 function togglePlayPause() {
@@ -276,34 +313,24 @@ function setPlaybackSpeed(speed: number) {
 }
 
 function stepForward() {
-  if (!animation.value) return;
-  const newFrame = Math.min(currentFrame.value + 10, totalFrames.value - 1);
-  animation.value.goToAndStop(newFrame, true);
+  goToFrame(Math.min(currentFrame.value + 10, totalFrames.value - 1));
 }
 
 function stepBackward() {
-  if (!animation.value) return;
-  const newFrame = Math.max(currentFrame.value - 10, 0);
-  animation.value.goToAndStop(newFrame, true);
+  goToFrame(Math.max(currentFrame.value - 10, 0));
 }
 
 function nextFrame() {
-  if (!animation.value) return;
-  const newFrame = Math.min(currentFrame.value + 1, totalFrames.value - 1);
-  animation.value.goToAndStop(newFrame, true);
+  goToFrame(Math.min(currentFrame.value + 1, totalFrames.value - 1));
 }
 
 function previousFrame() {
-  if (!animation.value) return;
-  const newFrame = Math.max(currentFrame.value - 1, 0);
-  animation.value.goToAndStop(newFrame, true);
+  goToFrame(Math.max(currentFrame.value - 1, 0));
 }
 
 function captureFrame() {
-  if (!animation.value || !lottieContainer.value) return;
-
-  const canvas = lottieContainer.value.querySelector("canvas");
-  if (!canvas) return;
+  const canvas = lottieCanvas.value;
+  if (!animation.value || !canvas) return;
 
   const thumbnail = canvas.toDataURL("image/png");
 
@@ -314,54 +341,43 @@ function captureFrame() {
     thumbnail,
   };
 
-  capturedFrames.value.push(frame);
   emit("frameCaptured", frame);
 }
 
 async function quickCapture(count: number, interval: number) {
-  if (!animation.value) return;
+  if (!animation.value || isCapturing.value) return;
 
   const wasPlaying = isPlaying.value;
+  const lastFrame = Math.max(0, totalFrames.value - 1);
 
-  if (wasPlaying) {
-    animation.value.pause();
-    isPlaying.value = false;
-  }
-
+  let frames: number[];
   if (interval === -1 && count === 3) {
     // Special case: Start, Middle, End
-    const frames = [
-      0,
-      Math.floor(totalFrames.value / 2),
-      totalFrames.value - 1,
-    ];
-
-    for (const frame of frames) {
-      animation.value.goToAndStop(frame, true);
-      await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for render
-      captureFrame();
-    }
+    frames = [0, Math.floor(totalFrames.value / 2), lastFrame];
   } else if (count === -1) {
-    // Capture at intervals throughout the animation
-    const frameCount = Math.floor(totalFrames.value / interval);
-
-    for (let i = 0; i < frameCount; i++) {
-      animation.value.goToAndStop(i * interval, true);
-      await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for render
-      captureFrame();
-    }
+    // Capture at intervals throughout the animation (0, n, 2n, ... up to the end)
+    const frameCount = Math.ceil(totalFrames.value / interval);
+    frames = Array.from({ length: frameCount }, (_, i) => i * interval);
   } else {
     // Capture specific number of frames
-    for (let i = 0; i < count; i++) {
-      animation.value.goToAndStop(i * interval, true);
-      await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for render
+    frames = Array.from({ length: count }, (_, i) => i * interval);
+  }
+  frames = [...new Set(frames.map((f) => Math.min(f, lastFrame)))];
+
+  isCapturing.value = true;
+  try {
+    for (const frame of frames) {
+      goToFrame(frame);
+      // goToAndStop renders synchronously; yield so the UI stays responsive
+      await new Promise((resolve) => requestAnimationFrame(resolve));
       captureFrame();
     }
-  }
-
-  if (wasPlaying) {
-    animation.value.play();
-    isPlaying.value = true;
+  } finally {
+    isCapturing.value = false;
+    if (wasPlaying && animation.value) {
+      animation.value.play();
+      isPlaying.value = true;
+    }
   }
 }
 

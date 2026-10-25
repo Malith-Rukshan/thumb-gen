@@ -11,7 +11,9 @@
       </p>
 
       <!-- Use Cases -->
-      <div class="rounded-2xl p-5 space-y-2 bg-linear-to-br from-blue-50 to-indigo-50/70 ring-1 ring-blue-100">
+      <div
+        class="rounded-2xl p-5 space-y-2 bg-linear-to-br from-blue-50 to-indigo-50/70 ring-1 ring-blue-100"
+      >
         <h3 class="font-semibold text-gray-900 flex items-center gap-2">
           <svg
             class="w-5 h-5 text-blue-600"
@@ -66,6 +68,7 @@
         subtitle="or click to browse"
         :formats="['PNG', 'JPG', 'WebP', 'GIF']"
         allow-url
+        paste
         @files="handleImageUpload"
         @url="handleImageUrl"
         @error="errorMessage = $event"
@@ -91,6 +94,8 @@
         <button
           @click="resetImage"
           class="p-2 text-gray-500 hover:text-gray-700 transition-colors"
+          type="button"
+          aria-label="Remove"
         >
           <XIcon class="w-5 h-5" />
         </button>
@@ -133,7 +138,9 @@
       </div>
 
       <!-- Options -->
-      <div class="p-6 bg-gray-50/80 rounded-2xl ring-1 ring-gray-200/70 space-y-4">
+      <div
+        class="p-6 bg-gray-50/80 rounded-2xl ring-1 ring-gray-200/70 space-y-4"
+      >
         <h4 class="text-base font-medium text-gray-900">Options</h4>
 
         <div class="space-y-4">
@@ -207,9 +214,7 @@
             @click="activeCodeTab = tab.id"
             :class="[
               'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
-              activeCodeTab === tab.id
-                ? 'chip chip-active'
-                : 'chip',
+              activeCodeTab === tab.id ? 'chip chip-active' : 'chip',
             ]"
           >
             {{ tab.label }}
@@ -251,7 +256,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onUnmounted } from "vue";
 import { ImageIcon, XIcon, CopyIcon } from "@lucide/vue";
 import DropZone from "@/components/common/DropZone.vue";
 import { formatFileSize } from "@/utils/fileHelpers";
@@ -427,7 +432,7 @@ defineProps({
 })
 
 const loaded = ref(false)
-<\/script>\``;
+<\/script>`;
 
     case "dataUri":
       return dataUri;
@@ -438,6 +443,7 @@ const loaded = ref(false)
 });
 
 function handleImageUpload(files: File[]) {
+  resetImage();
   imageFile.value = files[0];
   imageUrl.value = URL.createObjectURL(files[0]);
   errorMessage.value = "";
@@ -462,21 +468,17 @@ async function handleImageUrl(url: string) {
     const ctx = canvas.getContext("2d")!;
     ctx.drawImage(img, 0, 0);
 
-    canvas.toBlob(
-      (blob) => {
-        if (blob) {
-          imageFile.value = new File([blob], "image-from-url.jpg", {
-            type: "image/jpeg",
-          });
-          imageUrl.value = canvas.toDataURL("image/jpeg", 0.95);
-          errorMessage.value = "";
-        } else {
-          errorMessage.value = "Failed to process image";
-        }
-      },
-      "image/jpeg",
-      0.95,
-    );
+    canvas.toBlob((blob) => {
+      if (blob) {
+        imageFile.value = new File([blob], "image-from-url.png", {
+          type: "image/png",
+        });
+        imageUrl.value = URL.createObjectURL(blob);
+        errorMessage.value = "";
+      } else {
+        errorMessage.value = "Failed to process image";
+      }
+    }, "image/png");
   } catch (error) {
     errorMessage.value =
       "Failed to load image from URL. The image may be protected by CORS policy.";
@@ -513,14 +515,18 @@ async function generateBase64() {
 
     if (aspectRatio > 1) {
       // Landscape
-      canvasHeight = Math.round(previewSize.value / aspectRatio);
+      canvasHeight = Math.max(1, Math.round(previewSize.value / aspectRatio));
     } else {
       // Portrait
-      canvasWidth = Math.round(previewSize.value * aspectRatio);
+      canvasWidth = Math.max(1, Math.round(previewSize.value * aspectRatio));
     }
 
     // Create small canvas
     const { canvas, ctx } = createCanvas(canvasWidth, canvasHeight);
+
+    // JPEG has no alpha: give transparent images a white backdrop instead of black
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     // Draw image to fit canvas
     ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
@@ -548,12 +554,17 @@ async function generateBase64() {
   }
 }
 
-function copyToClipboard() {
-  navigator.clipboard.writeText(generatedCode.value);
-  copied.value = true;
-  setTimeout(() => {
-    copied.value = false;
-  }, 2000);
+async function copyToClipboard() {
+  try {
+    await navigator.clipboard.writeText(generatedCode.value);
+    copied.value = true;
+    setTimeout(() => {
+      copied.value = false;
+    }, 2000);
+  } catch {
+    errorMessage.value =
+      "Couldn't copy to clipboard. Please copy the code manually.";
+  }
 }
 
 function resetImage() {
@@ -573,6 +584,9 @@ watch([previewSize, quality], () => {
     generateBase64();
   }
 });
+
+// Release the object URL when leaving the page
+onUnmounted(resetImage);
 </script>
 
 <style scoped>

@@ -2,7 +2,9 @@
   <div class="space-y-6">
     <!-- Header Section -->
     <div class="space-y-4">
-      <h2 class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">Watermark Tool</h2>
+      <h2 class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
+        Watermark Tool
+      </h2>
       <p class="text-lg text-gray-600 leading-relaxed">
         Protect your images and add professional branding with custom
         watermarks. Support for text and image watermarks with full control over
@@ -10,7 +12,9 @@
       </p>
 
       <!-- Use Cases -->
-      <div class="rounded-2xl p-5 space-y-2 bg-linear-to-br from-blue-50 to-indigo-50/70 ring-1 ring-blue-100">
+      <div
+        class="rounded-2xl p-5 space-y-2 bg-linear-to-br from-blue-50 to-indigo-50/70 ring-1 ring-blue-100"
+      >
         <h3 class="font-semibold text-gray-900 flex items-center gap-2">
           <svg
             class="w-5 h-5 text-blue-600"
@@ -70,6 +74,7 @@
             :formats="['PNG', 'JPG', 'WebP']"
             allow-url
             multiple
+            paste
             @files="handleMainImages"
             @url="handleImageUrl"
             @error="errorMessage = $event"
@@ -77,10 +82,7 @@
         </div>
 
         <!-- Image Info -->
-        <div
-          v-else
-          class="card p-6"
-        >
+        <div v-else class="card p-6">
           <div class="flex items-center justify-between mb-4">
             <h3 class="font-semibold text-gray-900">Uploaded Images</h3>
             <button
@@ -173,10 +175,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1"
                   >Font Family</label
                 >
-                <select
-                  v-model="fontFamily"
-                  class="input"
-                >
+                <select v-model="fontFamily" class="input">
                   <option value="Arial">Arial</option>
                   <option value="Helvetica">Helvetica</option>
                   <option value="Times New Roman">Times New Roman</option>
@@ -269,9 +268,7 @@
                   @click="position = pos.value"
                   :class="[
                     'py-2 px-3 text-sm rounded-lg transition-colors',
-                    position === pos.value
-                      ? 'chip chip-active'
-                      : 'chip',
+                    position === pos.value ? 'chip chip-active' : 'chip',
                   ]"
                 >
                   {{ pos.label }}
@@ -338,10 +335,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-1"
                 >Export Format</label
               >
-              <select
-                v-model="exportFormat"
-                class="input"
-              >
+              <select v-model="exportFormat" class="input">
                 <option value="png">PNG (Best for transparency)</option>
                 <option value="jpg">JPG (Smaller file size)</option>
                 <option value="webp">WebP (Modern format)</option>
@@ -369,7 +363,7 @@
                 class="flex-1"
                 :disabled="!mainImage || (!watermarkText && !watermarkImage)"
               >
-                <DownloadIcon class="w-4 h-4 mr-2" />
+                <DownloadIcon class="w-4 h-4" />
                 Download Current
               </Button>
 
@@ -377,10 +371,11 @@
                 v-if="uploadedImages.length > 1"
                 @click="downloadAllImages"
                 variant="secondary"
+                :loading="isExportingAll"
                 class="flex-1"
                 :disabled="!mainImage || (!watermarkText && !watermarkImage)"
               >
-                <DownloadIcon class="w-4 h-4 mr-2" />
+                <DownloadIcon class="w-4 h-4" />
                 Download All (ZIP)
               </Button>
             </div>
@@ -404,7 +399,13 @@ import { ref, computed, watch, onMounted, nextTick } from "vue";
 import { DropletIcon, ImageIcon, DownloadIcon } from "@lucide/vue";
 import DropZone from "@/components/common/DropZone.vue";
 import Button from "@/components/ui/Button.vue";
-import { formatFileSize } from "@/utils/fileHelpers";
+import {
+  downloadFile,
+  fileToDataURL,
+  formatFileSize,
+  stripExtension,
+} from "@/utils/fileHelpers";
+import { canvasToBlob } from "@/utils/canvas";
 
 interface UploadedImage {
   name: string;
@@ -458,35 +459,40 @@ const positions = [
   { label: "Bottom Right", value: "bottom-right" },
 ];
 
-const handleMainImages = (files: File[]) => {
-  uploadedImages.value = [];
-  files.forEach((file) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      uploadedImages.value.push({
-        name: file.name,
-        size: file.size,
-        url: e.target?.result as string,
-        file,
-      });
-      if (uploadedImages.value.length === 1) {
-        drawCanvas();
-      }
-    };
-    reader.readAsDataURL(file);
-  });
+const handleMainImages = async (files: File[]) => {
+  errorMessage.value = "";
+  try {
+    // Read all files, keeping the order the user selected them in
+    const urls = await Promise.all(files.map(fileToDataURL));
+    uploadedImages.value = files.map((file, i) => ({
+      name: file.name,
+      size: file.size,
+      url: urls[i],
+      file,
+    }));
+    currentImageIndex.value = 0;
+    drawCanvas();
+  } catch {
+    errorMessage.value = "Failed to read one of the images";
+  }
 };
 
-const handleImageUrl = (url: string) => {
-  fetch(url)
-    .then((res) => res.blob())
-    .then((blob) => {
-      const file = new File([blob], "image-from-url.jpg", { type: blob.type });
-      handleMainImages([file]);
-    })
-    .catch(() => {
-      errorMessage.value = "Failed to load image from URL";
-    });
+const handleImageUrl = async (url: string) => {
+  errorMessage.value = "";
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob = await res.blob();
+    if (!blob.type.startsWith("image/")) throw new Error("Not an image");
+
+    const name =
+      decodeURIComponent(new URL(url).pathname.split("/").pop() || "") ||
+      "image-from-url";
+    handleMainImages([new File([blob], name, { type: blob.type })]);
+  } catch {
+    errorMessage.value =
+      "Failed to load image from URL (it may not be an image, or the server blocks cross-origin requests)";
+  }
 };
 
 const handleWatermarkImage = (files: File[]) => {
@@ -515,32 +521,62 @@ const resetImages = () => {
   watermarkImage.value = null;
 };
 
-const drawCanvas = async () => {
+// Decoding a full-size photo is slow, so keep the last decoded image around
+let cachedMain: { url: string; img: HTMLImageElement } | null = null;
+const getMainImage = async (url: string) => {
+  if (cachedMain?.url !== url) {
+    const img = new Image();
+    img.src = url;
+    await img.decode();
+    cachedMain = { url, img };
+  }
+  return cachedMain.img;
+};
+
+// drawCanvas() resolves once the canvas shows the current image + watermark.
+// If a newer redraw starts meanwhile (e.g. from a watcher), wait for that one.
+let drawToken = 0;
+let latestDraw: Promise<void> = Promise.resolve();
+const drawCanvas = (): Promise<void> => {
+  const token = ++drawToken;
+  latestDraw = renderCanvas(token);
+  return latestDraw;
+};
+
+const renderCanvas = async (token: number): Promise<void> => {
   await nextTick();
 
   const canvas = canvasRef.value;
-  if (!canvas || !mainImage.value) return;
+  const current = mainImage.value;
+  if (!canvas || !current) return;
 
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
-  const img = new Image();
-  img.onload = () => {
-    // Set canvas size to match image
-    canvas.width = img.width;
-    canvas.height = img.height;
+  let img: HTMLImageElement;
+  try {
+    img = await getMainImage(current.url);
+  } catch {
+    errorMessage.value = `Failed to load ${current.name}`;
+    return;
+  }
 
-    // Draw main image
-    ctx.drawImage(img, 0, 0);
+  // A newer redraw started while we were decoding
+  if (token !== drawToken) return latestDraw;
 
-    // Apply watermark
-    if (watermarkType.value === "text" && watermarkText.value) {
-      drawTextWatermark(ctx, canvas);
-    } else if (watermarkType.value === "image" && watermarkImage.value) {
-      drawImageWatermark(ctx, canvas);
-    }
-  };
-  img.src = mainImage.value.url;
+  // Set canvas size to match image
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+
+  // Draw main image
+  ctx.drawImage(img, 0, 0);
+
+  // Apply watermark
+  if (watermarkType.value === "text" && watermarkText.value) {
+    drawTextWatermark(ctx, canvas);
+  } else if (watermarkType.value === "image" && watermarkImage.value) {
+    drawImageWatermark(ctx, canvas);
+  }
 };
 
 const drawTextWatermark = (
@@ -673,64 +709,65 @@ const calculatePosition = (
   return { x, y };
 };
 
-const downloadCurrentImage = () => {
+const exportName = (name: string) =>
+  `watermarked-${stripExtension(name)}.${exportFormat.value}`;
+
+const exportCanvas = () => {
   const canvas = canvasRef.value;
-  if (!canvas) return;
-
-  canvas.toBlob(
-    (blob) => {
-      if (!blob) {
-        errorMessage.value = "Failed to generate image";
-        return;
-      }
-
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `watermarked-${mainImage.value?.name || "image"}.${exportFormat.value}`;
-      a.click();
-      URL.revokeObjectURL(url);
-    },
-    `image/${exportFormat.value}`,
-    exportQuality.value / 100,
-  );
+  if (!canvas) throw new Error("Canvas not ready");
+  return canvasToBlob(canvas, {
+    format: exportFormat.value,
+    quality: exportQuality.value,
+  });
 };
 
-const downloadAllImages = async () => {
-  const JSZip = (await import("jszip")).default;
-  const zip = new JSZip();
-
-  for (let i = 0; i < uploadedImages.value.length; i++) {
-    currentImageIndex.value = i;
+const downloadCurrentImage = async () => {
+  try {
     await drawCanvas();
-    await new Promise((resolve) => setTimeout(resolve, 100)); // Small delay to ensure canvas is drawn
-
-    const canvas = canvasRef.value;
-    if (!canvas) continue;
-
-    const blob = await new Promise<Blob>((resolve) => {
-      canvas.toBlob(
-        (blob) => resolve(blob!),
-        `image/${exportFormat.value}`,
-        exportQuality.value / 100,
-      );
-    });
-
-    if (blob) {
-      zip.file(`watermarked-${uploadedImages.value[i].name}`, blob);
-    }
+    const blob = await exportCanvas();
+    await downloadFile(blob, exportName(mainImage.value?.name || "image"));
+  } catch {
+    errorMessage.value = "Failed to generate image";
   }
+};
 
-  const content = await zip.generateAsync({ type: "blob" });
-  const url = URL.createObjectURL(content);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "watermarked-images.zip";
-  a.click();
-  URL.revokeObjectURL(url);
+const isExportingAll = ref(false);
+const downloadAllImages = async () => {
+  if (isExportingAll.value) return;
+  isExportingAll.value = true;
+  const previousIndex = currentImageIndex.value;
 
-  currentImageIndex.value = 0;
-  drawCanvas();
+  try {
+    const JSZip = (await import("jszip")).default;
+    const zip = new JSZip();
+    const usedNames = new Set<string>();
+
+    for (let i = 0; i < uploadedImages.value.length; i++) {
+      currentImageIndex.value = i;
+      // Wait for this exact image to be drawn before reading the canvas
+      await drawCanvas();
+      const blob = await exportCanvas();
+
+      // Avoid overwriting entries when two files share a name
+      let name = exportName(uploadedImages.value[i].name);
+      for (let n = 2; usedNames.has(name); n++) {
+        name = exportName(
+          `${stripExtension(uploadedImages.value[i].name)}-${n}`,
+        );
+      }
+      usedNames.add(name);
+      zip.file(name, blob);
+    }
+
+    const content = await zip.generateAsync({ type: "blob" });
+    await downloadFile(content, "watermarked-images.zip");
+  } catch {
+    errorMessage.value = "Failed to export images";
+  } finally {
+    currentImageIndex.value = previousIndex;
+    isExportingAll.value = false;
+    drawCanvas();
+  }
 };
 
 // Watch for changes and redraw

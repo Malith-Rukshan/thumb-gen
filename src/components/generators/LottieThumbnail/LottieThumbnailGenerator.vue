@@ -11,7 +11,9 @@
       </p>
 
       <!-- Use Cases -->
-      <div class="rounded-2xl p-5 space-y-2 bg-linear-to-br from-blue-50 to-indigo-50/70 ring-1 ring-blue-100">
+      <div
+        class="rounded-2xl p-5 space-y-2 bg-linear-to-br from-blue-50 to-indigo-50/70 ring-1 ring-blue-100"
+      >
         <h3 class="font-semibold text-gray-900 flex items-center gap-2">
           <svg
             class="w-5 h-5 text-blue-600"
@@ -155,6 +157,8 @@
         <button
           @click="resetAnimation"
           class="p-2 text-gray-500 hover:text-gray-700 transition-colors"
+          type="button"
+          aria-label="Remove"
         >
           <XIcon class="w-5 h-5" />
         </button>
@@ -163,6 +167,7 @@
       <!-- Lottie Player -->
       <LottiePlayer
         :animation-data="animationData"
+        :frames="capturedFrames"
         @loaded="handleAnimationLoaded"
         @frame-captured="handleFrameCapture"
         @error="errorMessage = $event"
@@ -226,6 +231,8 @@
                   <button
                     @click.stop="removeFrame(frame.id)"
                     class="btn btn-danger !rounded-md p-1"
+                    type="button"
+                    aria-label="Delete"
                   >
                     <TrashIcon class="w-3 h-3" />
                   </button>
@@ -244,7 +251,9 @@
         </div>
 
         <!-- Export Options -->
-        <div class="mt-6 p-6 bg-gray-50/80 rounded-2xl ring-1 ring-gray-200/70 space-y-4">
+        <div
+          class="mt-6 p-6 bg-gray-50/80 rounded-2xl ring-1 ring-gray-200/70 space-y-4"
+        >
           <h4 class="text-base font-medium text-gray-900">Export Options</h4>
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -253,10 +262,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">
                 Format
               </label>
-              <select
-                v-model="exportOptions.format"
-                class="input"
-              >
+              <select v-model="exportOptions.format" class="input">
                 <option value="png">PNG</option>
                 <option value="jpg">JPG</option>
                 <option value="webp">WebP</option>
@@ -283,10 +289,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">
                 Background
               </label>
-              <select
-                v-model="exportOptions.background"
-                class="input"
-              >
+              <select v-model="exportOptions.background" class="input">
                 <option value="transparent">Transparent</option>
                 <option value="white">White</option>
                 <option value="black">Black</option>
@@ -299,10 +302,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">
                 Resolution
               </label>
-              <select
-                v-model="exportOptions.useCustomResolution"
-                class="input"
-              >
+              <select v-model="exportOptions.useCustomResolution" class="input">
                 <option :value="false">Square (1:1)</option>
                 <option :value="true">Custom Size</option>
               </select>
@@ -341,7 +341,7 @@
                 animationData.h || 512
               }}px
               <span v-if="animationData.w !== animationData.h"
-                >(will be cropped to square)</span
+                >(fitted to square, aspect ratio kept)</span
               >
             </div>
           </div>
@@ -434,7 +434,11 @@ import {
   downloadMultipleFiles,
   generateFileName,
 } from "@/utils/fileHelpers";
-import { canvasToBlob, createCheckerboardCanvas } from "@/utils/canvas";
+import {
+  canvasToBlob,
+  createCheckerboardCanvas,
+  loadImage,
+} from "@/utils/canvas";
 import type { LottieFrame, ExportOptions } from "@/types";
 
 const animationFile = ref<File | null>(null);
@@ -607,9 +611,7 @@ async function exportFrames(frames: LottieFrame[]) {
     const files = await Promise.all(
       frames.map(async (frame, index) => {
         // Load the thumbnail image
-        const img = new Image();
-        img.src = frame.thumbnail;
-        await new Promise((resolve) => (img.onload = resolve));
+        const img = await loadImage(frame.thumbnail);
 
         // Determine target dimensions
         const targetWidth = exportOptions.value.useCustomResolution

@@ -4,10 +4,8 @@ import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";
 import router from "./router";
+import "@fontsource-variable/inter";
 import "./styles/globals.css";
-
-// Check if CSS is loaded
-console.log("App initialized with Tailwind CSS v4");
 
 // Create Vue app
 const app = createApp(App);

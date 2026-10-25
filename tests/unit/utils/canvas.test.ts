@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createCanvas, resizeCanvas, drawImageToCanvas } from '@/utils/canvas'
+import { createCanvas, resizeCanvas, drawImageToCanvas, formatToMime } from '@/utils/canvas'
 
 describe('canvas utilities', () => {
   describe('createCanvas', () => {
@@ -50,6 +50,17 @@ describe('canvas utilities', () => {
       
       // This should not throw
       expect(() => drawImageToCanvas(ctx, mockImage)).not.toThrow()
+    })
+  })
+
+  describe('formatToMime', () => {
+    it('maps jpg to the real image/jpeg MIME type', () => {
+      expect(formatToMime('jpg')).toBe('image/jpeg')
+    })
+
+    it('passes png and webp through', () => {
+      expect(formatToMime('png')).toBe('image/png')
+      expect(formatToMime('webp')).toBe('image/webp')
     })
   })
 })

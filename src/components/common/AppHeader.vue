@@ -79,7 +79,9 @@
         v-if="mobileMenuOpen"
         class="fixed right-0 top-0 h-full w-72 bg-white/95 backdrop-blur-xl shadow-2xl z-50 md:hidden flex flex-col"
       >
-        <div class="p-4 flex items-center justify-between border-b border-gray-100">
+        <div
+          class="p-4 flex items-center justify-between border-b border-gray-100"
+        >
           <span class="font-semibold text-gray-900">Menu</span>
           <button
             type="button"
@@ -91,7 +93,9 @@
           </button>
         </div>
         <nav class="p-3 space-y-1 flex-1 overflow-y-auto">
-          <p class="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-gray-400">
+          <p
+            class="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-gray-400"
+          >
             Tools
           </p>
           <router-link
@@ -104,11 +108,16 @@
             <component :is="tool.icon" class="w-4 h-4" />
             {{ tool.label }}
           </router-link>
-          <p class="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wider text-gray-400">
+          <p
+            class="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wider text-gray-400"
+          >
             More
           </p>
           <router-link
-            v-for="link in [...navLinks.slice(1), { to: '/privacy-policy', label: 'Privacy Policy' }]"
+            v-for="link in [
+              ...navLinks.slice(1),
+              { to: '/privacy-policy', label: 'Privacy Policy' },
+            ]"
             :key="link.to"
             :to="link.to"
             class="block px-3 py-2.5 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"

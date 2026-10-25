@@ -81,7 +81,22 @@ export async function downloadFile(
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  // Revoking synchronously can cancel the download in Safari/Firefox
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/** "photo.final.png" -> "photo.final" */
+export function stripExtension(filename: string): string {
+  const dot = filename.lastIndexOf(".");
+  return dot > 0 ? filename.slice(0, dot) : filename;
+}
+
+/** Copy an image blob to the system clipboard (PNG is the only widely supported type). */
+export async function copyImageToClipboard(blob: Blob): Promise<void> {
+  if (!navigator.clipboard || typeof ClipboardItem === "undefined") {
+    throw new Error("Clipboard images are not supported in this browser");
+  }
+  await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
 }
 
 export async function downloadMultipleFiles(
