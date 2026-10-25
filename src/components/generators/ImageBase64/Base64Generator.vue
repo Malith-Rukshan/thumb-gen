@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <!-- Header Section -->
     <div class="space-y-4 mb-8">
-      <h2 class="text-3xl font-bold text-gray-900">
+      <h2 class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
         Image to Base64 Converter
       </h2>
       <p class="text-lg text-gray-600 leading-relaxed">
@@ -11,7 +11,7 @@
       </p>
 
       <!-- Use Cases -->
-      <div class="bg-blue-50 rounded-lg p-4 space-y-2">
+      <div class="rounded-2xl p-5 space-y-2 bg-linear-to-br from-blue-50 to-indigo-50/70 ring-1 ring-blue-100">
         <h3 class="font-semibold text-gray-900 flex items-center gap-2">
           <svg
             class="w-5 h-5 text-blue-600"
@@ -133,7 +133,7 @@
       </div>
 
       <!-- Options -->
-      <div class="p-6 bg-gray-50 rounded-lg space-y-4">
+      <div class="p-6 bg-gray-50/80 rounded-2xl ring-1 ring-gray-200/70 space-y-4">
         <h4 class="text-base font-medium text-gray-900">Options</h4>
 
         <div class="space-y-4">
@@ -208,8 +208,8 @@
             :class="[
               'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
               activeCodeTab === tab.id
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200',
+                ? 'chip chip-active'
+                : 'chip',
             ]"
           >
             {{ tab.label }}

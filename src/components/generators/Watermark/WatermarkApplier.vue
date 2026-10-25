@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <!-- Header Section -->
     <div class="space-y-4">
-      <h2 class="text-3xl font-bold text-gray-900">Watermark Tool</h2>
+      <h2 class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">Watermark Tool</h2>
       <p class="text-lg text-gray-600 leading-relaxed">
         Protect your images and add professional branding with custom
         watermarks. Support for text and image watermarks with full control over
@@ -10,7 +10,7 @@
       </p>
 
       <!-- Use Cases -->
-      <div class="bg-blue-50 rounded-lg p-4 space-y-2">
+      <div class="rounded-2xl p-5 space-y-2 bg-linear-to-br from-blue-50 to-indigo-50/70 ring-1 ring-blue-100">
         <h3 class="font-semibold text-gray-900 flex items-center gap-2">
           <svg
             class="w-5 h-5 text-blue-600"
@@ -79,7 +79,7 @@
         <!-- Image Info -->
         <div
           v-else
-          class="bg-white p-6 rounded-lg shadow-sm border border-gray-200"
+          class="card p-6"
         >
           <div class="flex items-center justify-between mb-4">
             <h3 class="font-semibold text-gray-900">Uploaded Images</h3>
@@ -119,7 +119,7 @@
         </div>
 
         <!-- Watermark Settings -->
-        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div class="card p-6">
           <h3 class="font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <DropletIcon class="w-5 h-5" />
             Watermark Settings
@@ -151,7 +151,7 @@
               <input
                 v-model="watermarkText"
                 type="text"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="input"
                 placeholder="© Your Name"
               />
             </div>
@@ -166,7 +166,7 @@
                   type="number"
                   min="10"
                   max="200"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="input"
                 />
               </div>
               <div>
@@ -175,7 +175,7 @@
                 >
                 <select
                   v-model="fontFamily"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="input"
                 >
                   <option value="Arial">Arial</option>
                   <option value="Helvetica">Helvetica</option>
@@ -200,7 +200,7 @@
                 <input
                   v-model="textColor"
                   type="text"
-                  class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="input flex-1 min-w-0"
                   placeholder="#FFFFFF"
                 />
               </div>
@@ -221,7 +221,7 @@
             </div>
             <div
               v-else
-              class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+              class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl ring-1 ring-gray-200/70"
             >
               <img
                 :src="watermarkImage.url"
@@ -270,8 +270,8 @@
                   :class="[
                     'py-2 px-3 text-sm rounded-lg transition-colors',
                     position === pos.value
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700',
+                      ? 'chip chip-active'
+                      : 'chip',
                   ]"
                 >
                   {{ pos.label }}
@@ -316,7 +316,7 @@
                 type="number"
                 min="0"
                 max="100"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="input"
               />
             </div>
           </div>
@@ -325,7 +325,7 @@
 
       <!-- Preview -->
       <div class="space-y-6">
-        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div class="card p-6">
           <h3 class="font-semibold text-gray-900 mb-4">Preview</h3>
 
           <div class="relative bg-checkerboard rounded-lg overflow-hidden">
@@ -340,7 +340,7 @@
               >
               <select
                 v-model="exportFormat"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="input"
               >
                 <option value="png">PNG (Best for transparency)</option>
                 <option value="jpg">JPG (Smaller file size)</option>

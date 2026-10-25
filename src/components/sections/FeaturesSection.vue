@@ -2,28 +2,25 @@
   <section id="features" class="py-16">
     <div class="container mx-auto px-4">
       <div class="text-center mb-12">
-        <a
-          class="text-3xl lg:text-4xl font-bold text-gray-900"
-          href="#features"
-        >
-          Features
-        </a>
+        <h2 class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
+          <a href="#features">Features</a>
+        </h2>
         <p class="text-lg text-gray-600 max-w-2xl mx-auto mt-4">
           Everything you need to create perfect thumbnails, all in one place
         </p>
       </div>
 
       <div
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto"
       >
         <!-- Privacy First -->
-        <div class="text-center group">
+        <div class="card p-6 text-center group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lifted)]">
           <div
-            class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-2xl mb-4 group-hover:bg-blue-200 transition-colors"
+            class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 bg-linear-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25 transition-transform duration-300 group-hover:scale-110"
           >
-            <ShieldCheckIcon class="w-8 h-8 text-blue-600" />
+            <ShieldCheckIcon class="w-7 h-7 text-white" />
           </div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">100% Private</h3>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">100% Private</h3>
           <p class="text-gray-600">
             All processing happens in your browser. Your files never leave your
             device.
@@ -31,13 +28,13 @@
         </div>
 
         <!-- No Registration -->
-        <div class="text-center group">
+        <div class="card p-6 text-center group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lifted)]">
           <div
-            class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-2xl mb-4 group-hover:bg-blue-200 transition-colors"
+            class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 bg-linear-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25 transition-transform duration-300 group-hover:scale-110"
           >
-            <UserXIcon class="w-8 h-8 text-blue-600" />
+            <UserXIcon class="w-7 h-7 text-white" />
           </div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">
             No Registration
           </h3>
           <p class="text-gray-600">
@@ -46,13 +43,13 @@
         </div>
 
         <!-- Fast Processing -->
-        <div class="text-center group">
+        <div class="card p-6 text-center group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lifted)]">
           <div
-            class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-2xl mb-4 group-hover:bg-blue-200 transition-colors"
+            class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 bg-linear-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25 transition-transform duration-300 group-hover:scale-110"
           >
-            <ZapIcon class="w-8 h-8 text-blue-600" />
+            <ZapIcon class="w-7 h-7 text-white" />
           </div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">
             Lightning Fast
           </h3>
           <p class="text-gray-600">
@@ -61,13 +58,13 @@
         </div>
 
         <!-- Multiple Formats -->
-        <div class="text-center group">
+        <div class="card p-6 text-center group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lifted)]">
           <div
-            class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-2xl mb-4 group-hover:bg-blue-200 transition-colors"
+            class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 bg-linear-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25 transition-transform duration-300 group-hover:scale-110"
           >
-            <FileStackIcon class="w-8 h-8 text-blue-600" />
+            <FileStackIcon class="w-7 h-7 text-white" />
           </div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">
             Multiple Formats
           </h3>
           <p class="text-gray-600">
@@ -76,26 +73,26 @@
         </div>
 
         <!-- Batch Processing -->
-        <div class="text-center group">
+        <div class="card p-6 text-center group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lifted)]">
           <div
-            class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-2xl mb-4 group-hover:bg-blue-200 transition-colors"
+            class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 bg-linear-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25 transition-transform duration-300 group-hover:scale-110"
           >
-            <LayersIcon class="w-8 h-8 text-blue-600" />
+            <LayersIcon class="w-7 h-7 text-white" />
           </div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">Batch Export</h3>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Batch Export</h3>
           <p class="text-gray-600">
             Process multiple frames or images at once. Export as ZIP.
           </p>
         </div>
 
         <!-- Open Source -->
-        <div class="text-center group">
+        <div class="card p-6 text-center group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lifted)]">
           <div
-            class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-2xl mb-4 group-hover:bg-blue-200 transition-colors"
+            class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 bg-linear-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25 transition-transform duration-300 group-hover:scale-110"
           >
-            <GithubIcon class="w-8 h-8 text-blue-600" />
+            <GithubIcon class="w-7 h-7 text-white" />
           </div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">Open Source</h3>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Open Source</h3>
           <p class="text-gray-600">
             Transparent, auditable code. Contribute or self-host.
           </p>
@@ -104,7 +101,7 @@
 
       <!-- Demo: Progressive Image Loading -->
       <div class="mt-16 max-w-4xl mx-auto">
-        <div class="rounded-2xl p-8 shadow-[0_0px_15px_rgba(0,0,0,0.1)]">
+        <div class="card p-6 lg:p-8">
           <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">
             See Base64 Placeholders in Action
           </h3>
@@ -127,7 +124,7 @@
                   v-else
                   class="absolute inset-0 flex items-center justify-center"
                 >
-                  <LoadingSpinner class="w-8 h-8" />
+                  <LoadingSpinner />
                 </div>
               </div>
               <p class="text-sm text-gray-600">
@@ -168,7 +165,7 @@
           <div class="mt-6 text-center">
             <button
               @click="resetDemo"
-              class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              class="btn btn-primary"
             >
               Reload Demo
             </button>

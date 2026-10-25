@@ -79,7 +79,7 @@
         <!-- Play/Pause -->
         <button
           @click="togglePlayPause"
-          class="p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
+          class="btn btn-primary btn-icon !rounded-full p-3"
         >
           <component :is="isPlaying ? PauseIcon : PlayIcon" class="w-6 h-6" />
         </button>
@@ -108,7 +108,7 @@
         <button
           @click="captureFrame"
           :disabled="!videoRef"
-          class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-2"
+          class="btn btn-success btn-lg"
         >
           <CameraIcon class="w-5 h-5" />
           Capture Frame
@@ -121,7 +121,7 @@
           v-for="option in quickCaptureOptions"
           :key="option.label"
           @click="quickCapture(option.count, option.interval)"
-          class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+          class="btn btn-secondary btn-sm"
         >
           {{ option.label }}
         </button>

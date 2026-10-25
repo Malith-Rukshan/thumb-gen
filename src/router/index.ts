@@ -1,15 +1,9 @@
 import { createRouter, createWebHistory } from "vue-router";
 import type { RouteRecordRaw } from "vue-router";
 
-// Import views
+// Home is eager for a fast first paint; tool pages are lazy-loaded so heavy
+// libraries (lottie-web, jszip) only download when a tool is opened
 import HomePage from "@/views/HomePage.vue";
-import VideoThumbnailPage from "@/views/VideoThumbnailPage.vue";
-import LottieThumbnailPage from "@/views/LottieThumbnailPage.vue";
-import Base64ConverterPage from "@/views/Base64ConverterPage.vue";
-import TextThumbnailPage from "@/views/TextThumbnailPage.vue";
-import WatermarkToolPage from "@/views/WatermarkToolPage.vue";
-import PrivacyPolicyPage from "@/views/PrivacyPolicyPage.vue";
-import NotFoundPage from "@/views/NotFoundPage.vue";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -25,7 +19,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/video-thumbnail-generator",
     name: "video-thumbnail",
-    component: VideoThumbnailPage,
+    component: () => import("@/views/VideoThumbnailPage.vue"),
     meta: {
       title:
         "Video Thumbnail Generator - Extract Frames from Videos | ThumbGen",
@@ -36,7 +30,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/lottie-thumbnail-generator",
     name: "lottie-thumbnail",
-    component: LottieThumbnailPage,
+    component: () => import("@/views/LottieThumbnailPage.vue"),
     meta: {
       title:
         "Lottie & TGS Thumbnail Generator - Extract Animation Frames | ThumbGen",
@@ -47,7 +41,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/base64-image-converter",
     name: "base64-converter",
-    component: Base64ConverterPage,
+    component: () => import("@/views/Base64ConverterPage.vue"),
     meta: {
       title: "Image to Base64 Converter - Create Tiny Placeholders | ThumbGen",
       description:
@@ -57,7 +51,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/text-thumbnail-generator",
     name: "text-thumbnail",
-    component: TextThumbnailPage,
+    component: () => import("@/views/TextThumbnailPage.vue"),
     meta: {
       title: "Text Thumbnail Generator - Create Custom Text Images | ThumbGen",
       description:
@@ -67,7 +61,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/watermark-tool",
     name: "watermark-tool",
-    component: WatermarkToolPage,
+    component: () => import("@/views/WatermarkToolPage.vue"),
     meta: {
       title: "Watermark Tool - Add Watermarks to Images | ThumbGen",
       description:
@@ -77,7 +71,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/privacy-policy",
     name: "privacy-policy",
-    component: PrivacyPolicyPage,
+    component: () => import("@/views/PrivacyPolicyPage.vue"),
     meta: {
       title: "Privacy Policy | ThumbGen",
       description:
@@ -88,7 +82,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/:pathMatch(.*)*",
     name: "not-found",
-    component: NotFoundPage,
+    component: () => import("@/views/NotFoundPage.vue"),
     meta: {
       title: "404 - Page Not Found | ThumbGen",
       description: "The page you're looking for doesn't exist.",
@@ -114,7 +108,7 @@ const router = createRouter({
 });
 
 // Update page title and meta tags
-router.beforeEach((to, _from, next) => {
+router.afterEach((to) => {
   document.title = (to.meta.title as string) || "ThumbGen";
 
   // Update meta description
@@ -125,8 +119,19 @@ router.beforeEach((to, _from, next) => {
       (to.meta.description as string) || "",
     );
   }
+});
 
-  next();
+// After a new deploy, old lazy chunk hashes no longer exist on the server.
+// Reload once to pick up the fresh build instead of showing a blank page.
+router.onError((error, to) => {
+  const isChunkError =
+    /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module/i.test(
+      String(error?.message),
+    );
+  if (isChunkError && sessionStorage.getItem("chunk-reload") !== to.fullPath) {
+    sessionStorage.setItem("chunk-reload", to.fullPath);
+    window.location.assign(to.fullPath);
+  }
 });
 
 export default router;

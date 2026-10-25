@@ -1,97 +1,226 @@
 @import "tailwindcss";
 
-/* Theme Configuration for Tailwind CSS v4 */
+/* Theme: Tailwind v4 default (oklch) palette + a few app tokens */
 @theme {
-  /* Define all the colors we need */
-  --color-gray-50: #f9fafb;
-  --color-gray-100: #f3f4f6;
-  --color-gray-200: #e5e7eb;
-  --color-gray-300: #d1d5db;
-  --color-gray-400: #9ca3af;
-  --color-gray-500: #6b7280;
-  --color-gray-600: #4b5563;
-  --color-gray-700: #374151;
-  --color-gray-800: #1f2937;
-  --color-gray-900: #111827;
-  --color-gray-950: #030712;
+  --font-sans:
+    "Inter var", "InterVariable", Inter, ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji";
 
-  --color-blue-50: #eff6ff;
-  --color-blue-100: #dbeafe;
-  --color-blue-200: #bfdbfe;
-  --color-blue-300: #93c5fd;
-  --color-blue-400: #60a5fa;
-  --color-blue-500: #3b82f6;
-  --color-blue-600: #2563eb;
-  --color-blue-700: #1d4ed8;
-  --color-blue-800: #1e40af;
-  --color-blue-900: #1e3a8a;
-
-  --color-green-50: #f0fdf4;
-  --color-green-100: #dcfce7;
-  --color-green-200: #bbf7d0;
-  --color-green-300: #86efac;
-  --color-green-400: #4ade80;
-  --color-green-500: #22c55e;
-  --color-green-600: #16a34a;
-  --color-green-700: #15803d;
-
-  --color-red-50: #fef2f2;
-  --color-red-100: #fee2e2;
-  --color-red-200: #fecaca;
-  --color-red-300: #fca5a5;
-  --color-red-400: #f87171;
-  --color-red-500: #ef4444;
-  --color-red-600: #dc2626;
-  --color-red-700: #b91c1c;
-  --color-red-800: #991b1b;
-  --color-red-900: #7f1d1d;
-
-  --color-amber-500: #f59e0b;
-  --color-amber-600: #d97706;
-  --color-orange-500: #f97316;
-  --color-orange-600: #ea580c;
-
-  --color-white: #ffffff;
-  --color-black: #000000;
-  --color-transparent: transparent;
-  --color-current: currentColor;
-
-  /* Primary colors (referencing blue) */
-  --color-primary-50: var(--color-blue-50);
-  --color-primary-100: var(--color-blue-100);
-  --color-primary-200: var(--color-blue-200);
-  --color-primary-300: var(--color-blue-300);
-  --color-primary-400: var(--color-blue-400);
-  --color-primary-500: var(--color-blue-500);
-  --color-primary-600: var(--color-blue-600);
-  --color-primary-700: var(--color-blue-700);
-  --color-primary-800: var(--color-blue-800);
-  --color-primary-900: var(--color-blue-900);
+  --shadow-soft:
+    0 1px 2px rgb(15 23 42 / 0.04), 0 4px 16px -4px rgb(15 23 42 / 0.08);
+  --shadow-lifted:
+    0 2px 4px rgb(15 23 42 / 0.04), 0 16px 32px -12px rgb(15 23 42 / 0.18);
 }
 
-/* Custom CSS variables for non-Tailwind values */
-:root {
-  --border-color: rgb(229 231 235);
-  --ring-color: rgb(59 130 246);
+/* Base styles */
+@layer base {
+  html {
+    color-scheme: light;
+    min-height: 100vh;
+    scroll-behavior: smooth;
+    /* Keep anchored sections clear of the sticky header */
+    scroll-padding-top: 5rem;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    min-height: 100vh;
+    background-color: #f8fafc;
+    background-image:
+      radial-gradient(60rem 40rem at 10% -10%, rgb(59 130 246 / 0.08), transparent 60%),
+      radial-gradient(50rem 36rem at 100% 0%, rgb(251 113 133 / 0.07), transparent 60%);
+    background-attachment: fixed;
+    color: var(--color-gray-900);
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  #app {
+    min-height: 100vh;
+    position: relative;
+  }
+
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-gray-200);
+  }
+
+  /* Tailwind v4 preflight resets buttons to the default cursor */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  input[type="range"],
+  input[type="checkbox"],
+  input[type="radio"] {
+    accent-color: var(--color-blue-600);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-blue-500);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: rgb(59 130 246 / 0.2);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
 
-/* Base body styles */
-html {
-  color-scheme: light;
-  min-height: 100vh;
-}
+/* Reusable components */
+@layer components {
+  /* Buttons */
+  .btn {
+    @apply relative inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold whitespace-nowrap select-none;
+    transition:
+      transform 150ms ease,
+      box-shadow 200ms ease,
+      background-color 200ms ease,
+      color 200ms ease,
+      filter 200ms ease;
+  }
+  .btn:active:not(:disabled) {
+    transform: translateY(0) scale(0.97);
+  }
+  .btn:disabled {
+    @apply cursor-not-allowed opacity-50;
+    box-shadow: none;
+    filter: grayscale(0.3);
+  }
+  .btn > svg {
+    @apply size-4 shrink-0;
+  }
 
-body {
-  min-height: 100vh;
-  background: #fafbfc;
-  color: rgb(17 24 39);
-  position: relative;
-  overflow-x: hidden;
-}
+  .btn-sm {
+    @apply gap-1.5 rounded-lg px-3 py-1.5 text-xs;
+  }
+  .btn-sm > svg {
+    @apply size-3.5;
+  }
+  .btn-lg {
+    @apply gap-2.5 px-6 py-3 text-base;
+  }
+  .btn-lg > svg {
+    @apply size-5;
+  }
+  .btn-icon {
+    @apply aspect-square p-2.5;
+  }
 
-#app {
-  min-height: 100vh;
-  position: relative;
+  .btn-primary {
+    @apply text-white;
+    background-image: linear-gradient(135deg, var(--color-blue-600), var(--color-indigo-600));
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.18),
+      0 1px 2px rgb(37 99 235 / 0.3),
+      0 6px 16px -6px rgb(79 70 229 / 0.55);
+  }
+  .btn-primary:hover:not(:disabled) {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.18),
+      0 2px 4px rgb(37 99 235 / 0.3),
+      0 10px 24px -8px rgb(79 70 229 / 0.6);
+  }
+
+  .btn-success {
+    @apply text-white;
+    background-image: linear-gradient(135deg, var(--color-emerald-500), var(--color-teal-600));
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.18),
+      0 1px 2px rgb(5 150 105 / 0.3),
+      0 6px 16px -6px rgb(13 148 136 / 0.55);
+  }
+  .btn-success:hover:not(:disabled) {
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+  }
+
+  .btn-danger {
+    @apply text-white;
+    background-image: linear-gradient(135deg, var(--color-rose-500), var(--color-red-600));
+    box-shadow: 0 6px 16px -8px rgb(225 29 72 / 0.6);
+  }
+  .btn-danger:hover:not(:disabled) {
+    filter: brightness(1.06);
+  }
+
+  .btn-secondary {
+    @apply bg-white text-gray-800 ring-1 ring-gray-200 ring-inset;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    @apply bg-gray-50 text-gray-900 ring-gray-300;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent text-gray-600;
+  }
+  .btn-ghost:hover:not(:disabled) {
+    @apply bg-gray-900/5 text-gray-900;
+  }
+
+  /* Segmented / toggle options */
+  .chip {
+    @apply bg-white font-medium text-gray-700 ring-1 ring-gray-200 ring-inset;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease,
+      box-shadow 150ms ease;
+  }
+  .chip:hover {
+    @apply bg-gray-50 ring-gray-300;
+  }
+  .chip-active,
+  .chip-active:hover {
+    @apply text-white ring-transparent;
+    background-image: linear-gradient(135deg, var(--color-blue-600), var(--color-indigo-600));
+    box-shadow: 0 4px 12px -4px rgb(79 70 229 / 0.5);
+  }
+
+  /* Form fields */
+  .input {
+    @apply w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+    transition:
+      border-color 150ms ease,
+      box-shadow 150ms ease;
+  }
+  .input:hover {
+    @apply border-gray-300;
+  }
+  .input:focus {
+    @apply border-blue-500 outline-none;
+    box-shadow: 0 0 0 4px rgb(59 130 246 / 0.15);
+  }
+
+  /* Surfaces */
+  .card {
+    @apply rounded-2xl border border-gray-200/70 bg-white/90 backdrop-blur-sm;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, var(--color-blue-600), var(--color-indigo-500) 50%, var(--color-rose-500));
+  }
 }
 
 /* Gradient utilities */
@@ -134,11 +263,6 @@ body {
 
 .gradient-blur-2xl {
   filter: blur(128px);
-}
-
-/* Base styles */
-* {
-  border-color: var(--border-color);
 }
 
 /* Custom component styles */

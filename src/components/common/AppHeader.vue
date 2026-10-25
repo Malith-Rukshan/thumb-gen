@@ -1,68 +1,61 @@
 <template>
   <div>
     <header
-      class="relative z-20 border-b border-gray-200 bg-white/80 backdrop-blur-md"
+      :class="[
+        'sticky top-0 z-30 transition-all duration-300',
+        scrolled
+          ? 'bg-white/75 backdrop-blur-xl border-b border-gray-200/70 shadow-[0_1px_12px_-6px_rgb(15_23_42/0.15)]'
+          : 'bg-transparent border-b border-transparent',
+      ]"
     >
-      <div class="absolute inset-0 overflow-hidden">
-        <div
-          class="absolute -top-36 -left-72 w-[75rem] h-[54rem] bg-gradient-radial from-blue-500/12 to-transparent"
-        ></div>
-      </div>
-      <div class="container mx-auto px-4 relative">
+      <div class="container mx-auto px-4">
         <div class="flex items-center justify-between h-16">
           <!-- Logo -->
-          <router-link to="/" class="flex items-center space-x-3">
+          <router-link to="/" class="flex items-center gap-2.5 group">
             <div class="relative">
               <div
-                class="absolute inset-0 bg-blue-500/20 blur-lg rounded-full"
+                class="absolute inset-0 bg-rose-400/30 blur-lg rounded-full transition-opacity opacity-60 group-hover:opacity-100"
               ></div>
               <img
                 src="/logo.png"
                 alt="ThumbGen Logo"
-                class="w-8 h-8 relative"
+                class="w-8 h-8 relative transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-105"
                 draggable="false"
               />
             </div>
-            <span class="text-xl font-bold text-gray-900">
-              Thumb<span class="text-blue-600">Gen</span>
+            <span class="text-xl font-bold tracking-tight text-gray-900">
+              Thumb<span class="text-gradient">Gen</span>
             </span>
           </router-link>
 
           <!-- Navigation -->
-          <nav class="hidden md:flex items-center space-x-8">
+          <nav class="hidden md:flex items-center gap-1">
             <router-link
-              to="/#tools"
-              class="text-gray-600 hover:text-blue-600 transition-colors"
+              v-for="link in navLinks"
+              :key="link.to"
+              :to="link.to"
+              class="px-3.5 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-900/5 transition-colors"
             >
-              Tools
-            </router-link>
-            <router-link
-              to="/#features"
-              class="text-gray-600 hover:text-blue-600 transition-colors"
-            >
-              Features
-            </router-link>
-            <router-link
-              to="/#faq"
-              class="text-gray-600 hover:text-blue-600 transition-colors"
-            >
-              FAQ
+              {{ link.label }}
             </router-link>
             <a
               href="https://github.com/Malith-Rukshan/thumb-gen"
               target="_blank"
               rel="noopener noreferrer"
-              class="text-gray-600 hover:text-blue-600 transition-colors inline-flex items-center gap-1"
+              class="btn btn-secondary btn-sm ml-2"
             >
-              <GithubIcon class="w-4 h-4" />
-              GitHub
+              <GithubIcon />
+              Star on GitHub
             </a>
           </nav>
 
           <!-- Mobile menu button -->
           <button
+            type="button"
             @click="mobileMenuOpen = !mobileMenuOpen"
-            class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            class="md:hidden btn btn-ghost btn-icon"
+            :aria-label="mobileMenuOpen ? 'Close menu' : 'Open menu'"
+            :aria-expanded="mobileMenuOpen"
           >
             <MenuIcon v-if="!mobileMenuOpen" class="w-5 h-5" />
             <XIcon v-else class="w-5 h-5" />
@@ -75,7 +68,7 @@
     <Transition name="fade">
       <div
         v-if="mobileMenuOpen"
-        class="fixed inset-0 bg-black/50 z-40 md:hidden"
+        class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-40 md:hidden"
         @click="mobileMenuOpen = false"
       ></div>
     </Transition>
@@ -84,70 +77,110 @@
     <Transition name="slide-right">
       <div
         v-if="mobileMenuOpen"
-        class="fixed right-0 top-0 h-full w-64 bg-white shadow-xl z-50 md:hidden"
+        class="fixed right-0 top-0 h-full w-72 bg-white/95 backdrop-blur-xl shadow-2xl z-50 md:hidden flex flex-col"
       >
-        <div class="p-4 border-b border-gray-200">
+        <div class="p-4 flex items-center justify-between border-b border-gray-100">
+          <span class="font-semibold text-gray-900">Menu</span>
           <button
+            type="button"
             @click="mobileMenuOpen = false"
-            class="p-2 rounded-lg hover:bg-gray-100 transition-colors ml-auto block"
+            class="btn btn-ghost btn-icon"
+            aria-label="Close menu"
           >
             <XIcon class="w-5 h-5" />
           </button>
         </div>
-        <nav class="p-4 space-y-2">
-          <router-link
-            to="/#tools"
-            @click="mobileMenuOpen = false"
-            class="block px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
-          >
+        <nav class="p-3 space-y-1 flex-1 overflow-y-auto">
+          <p class="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-gray-400">
             Tools
-          </router-link>
+          </p>
           <router-link
-            to="/#features"
-            @click="mobileMenuOpen = false"
-            class="block px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
+            v-for="tool in tools"
+            :key="tool.to"
+            :to="tool.to"
+            class="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            active-class="!bg-blue-50 !text-blue-700"
           >
-            Features
+            <component :is="tool.icon" class="w-4 h-4" />
+            {{ tool.label }}
           </router-link>
+          <p class="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wider text-gray-400">
+            More
+          </p>
           <router-link
-            to="/#faq"
-            @click="mobileMenuOpen = false"
-            class="block px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
+            v-for="link in [...navLinks.slice(1), { to: '/privacy-policy', label: 'Privacy Policy' }]"
+            :key="link.to"
+            :to="link.to"
+            class="block px-3 py-2.5 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            FAQ
+            {{ link.label }}
           </router-link>
-          <router-link
-            to="/privacy-policy"
-            @click="mobileMenuOpen = false"
-            class="block px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
-          >
-            Privacy Policy
-          </router-link>
-          <div class="border-t border-gray-200 mt-4 pt-4">
-            <a
-              href="https://github.com/Malith-Rukshan/thumb-gen"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="block px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <span class="inline-flex items-center gap-2">
-                <GithubIcon class="w-4 h-4" />
-                GitHub
-              </span>
-            </a>
-          </div>
         </nav>
+        <div class="p-4 border-t border-gray-100">
+          <a
+            href="https://github.com/Malith-Rukshan/thumb-gen"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn-secondary w-full"
+          >
+            <GithubIcon />
+            Star on GitHub
+          </a>
+        </div>
       </div>
     </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import { MenuIcon, XIcon } from "@lucide/vue";
 import GithubIcon from "@/components/icons/GithubIcon.vue";
+import { tools } from "@/tools";
+
+const navLinks = [
+  { to: "/#tools", label: "Tools" },
+  { to: "/#features", label: "Features" },
+  { to: "/#faq", label: "FAQ" },
+];
 
 const mobileMenuOpen = ref(false);
+const scrolled = ref(false);
+const route = useRoute();
+
+// Close the drawer whenever navigation happens
+watch(
+  () => route.fullPath,
+  () => {
+    mobileMenuOpen.value = false;
+  },
+);
+
+// Lock page scroll while the drawer is open
+watch(mobileMenuOpen, (open) => {
+  document.body.style.overflow = open ? "hidden" : "";
+});
+
+const onScroll = () => {
+  scrolled.value = window.scrollY > 8;
+};
+
+const onKeydown = (e: KeyboardEvent) => {
+  if (e.key === "Escape") mobileMenuOpen.value = false;
+};
+
+onMounted(() => {
+  onScroll();
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("keydown", onKeydown);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("scroll", onScroll);
+  window.removeEventListener("keydown", onKeydown);
+  document.body.style.overflow = "";
+});
 </script>
 
 <style scoped>
@@ -163,7 +196,7 @@ const mobileMenuOpen = ref(false);
 
 .slide-right-enter-active,
 .slide-right-leave-active {
-  transition: transform 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .slide-right-enter-from,

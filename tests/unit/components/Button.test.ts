@@ -16,7 +16,15 @@ describe('Button', () => {
     const wrapper = mount(Button, {
       slots: { default: 'Button' }
     })
-    expect(wrapper.classes()).toContain('bg-blue-600')
+    expect(wrapper.classes()).toContain('btn')
+    expect(wrapper.classes()).toContain('btn-primary')
+  })
+
+  it('defaults to type="button" so it never submits forms by accident', () => {
+    const wrapper = mount(Button, {
+      slots: { default: 'Button' }
+    })
+    expect(wrapper.attributes('type')).toBe('button')
   })
 
   it('applies secondary variant when specified', () => {
@@ -24,7 +32,7 @@ describe('Button', () => {
       props: { variant: 'secondary' },
       slots: { default: 'Button' }
     })
-    expect(wrapper.classes()).toContain('bg-gray-100')
+    expect(wrapper.classes()).toContain('btn-secondary')
   })
 
   it('applies ghost variant when specified', () => {
@@ -32,7 +40,7 @@ describe('Button', () => {
       props: { variant: 'ghost' },
       slots: { default: 'Button' }
     })
-    expect(wrapper.classes()).toContain('text-gray-700')
+    expect(wrapper.classes()).toContain('btn-ghost')
   })
 
   it('applies danger variant when specified', () => {
@@ -40,7 +48,7 @@ describe('Button', () => {
       props: { variant: 'danger' },
       slots: { default: 'Button' }
     })
-    expect(wrapper.classes()).toContain('bg-red-600')
+    expect(wrapper.classes()).toContain('btn-danger')
   })
 
   it('applies correct size classes', () => {
@@ -48,15 +56,13 @@ describe('Button', () => {
       props: { size: 'sm' },
       slots: { default: 'Button' }
     })
-    expect(smWrapper.classes()).toContain('px-3')
-    expect(smWrapper.classes()).toContain('py-1.5')
+    expect(smWrapper.classes()).toContain('btn-sm')
 
     const lgWrapper = mount(Button, {
       props: { size: 'lg' },
       slots: { default: 'Button' }
     })
-    expect(lgWrapper.classes()).toContain('px-6')
-    expect(lgWrapper.classes()).toContain('py-3')
+    expect(lgWrapper.classes()).toContain('btn-lg')
   })
 
   it('is disabled when disabled prop is true', () => {

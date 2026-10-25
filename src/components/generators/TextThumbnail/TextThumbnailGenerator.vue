@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <!-- Header Section -->
     <div class="space-y-4">
-      <h2 class="text-3xl font-bold text-gray-900">Text Thumbnail Generator</h2>
+      <h2 class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">Text Thumbnail Generator</h2>
       <p class="text-lg text-gray-600 leading-relaxed">
         Design stunning text-based thumbnails with custom fonts, colors, and
         backgrounds. Perfect for social media posts, blog headers, and marketing
@@ -10,7 +10,7 @@
       </p>
 
       <!-- Use Cases -->
-      <div class="bg-blue-50 rounded-lg p-4 space-y-2">
+      <div class="rounded-2xl p-5 space-y-2 bg-linear-to-br from-blue-50 to-indigo-50/70 ring-1 ring-blue-100">
         <h3 class="font-semibold text-gray-900 flex items-center gap-2">
           <svg
             class="w-5 h-5 text-blue-600"
@@ -61,7 +61,7 @@
       <!-- Controls -->
       <div class="space-y-6">
         <!-- Canvas Settings -->
-        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div class="card p-6">
           <h3 class="font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <Settings2Icon class="w-5 h-5" />
             Canvas Settings
@@ -77,7 +77,7 @@
                 type="number"
                 min="100"
                 max="2000"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="input"
               />
             </div>
             <div>
@@ -89,7 +89,7 @@
                 type="number"
                 min="100"
                 max="2000"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="input"
               />
             </div>
           </div>
@@ -100,7 +100,7 @@
               v-for="preset in presetSizes"
               :key="preset.name"
               @click="applyPresetSize(preset)"
-              class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              class="btn btn-secondary btn-sm"
             >
               {{ preset.name }}
             </button>
@@ -108,7 +108,7 @@
         </div>
 
         <!-- Background Settings -->
-        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div class="card p-6">
           <h3 class="font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <PaletteIcon class="w-5 h-5" />
             Background
@@ -145,7 +145,7 @@
                 <input
                   v-model="backgroundColor"
                   type="text"
-                  class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="input flex-1 min-w-0"
                   placeholder="#000000"
                 />
               </div>
@@ -196,7 +196,7 @@
               >
               <select
                 v-model="gradientDirection"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="input"
               >
                 <option value="to-bottom">Top to Bottom</option>
                 <option value="to-right">Left to Right</option>
@@ -233,7 +233,7 @@
         </div>
 
         <!-- Text Settings -->
-        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div class="card p-6">
           <h3 class="font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <TypeIcon class="w-5 h-5" />
             Text Settings
@@ -247,7 +247,7 @@
               <textarea
                 v-model="textContent"
                 rows="3"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="input"
                 placeholder="Enter your text here..."
               ></textarea>
             </div>
@@ -258,7 +258,7 @@
               >
               <select
                 v-model="fontFamily"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="input"
               >
                 <option
                   v-for="font in availableFonts"
@@ -280,7 +280,7 @@
                   type="number"
                   min="10"
                   max="200"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="input"
                 />
               </div>
               <div>
@@ -293,7 +293,7 @@
                   min="0.5"
                   max="3"
                   step="0.1"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="input"
                 />
               </div>
             </div>
@@ -323,7 +323,7 @@
                 >
                 <select
                   v-model="fontWeight"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="input"
                 >
                   <option value="normal">Normal</option>
                   <option value="bold">Bold</option>
@@ -344,8 +344,8 @@
                   :class="[
                     'flex-1 py-2 rounded-lg transition-colors',
                     textAlign === align
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700',
+                      ? 'chip chip-active'
+                      : 'chip',
                   ]"
                 >
                   {{ align.charAt(0).toUpperCase() + align.slice(1) }}
@@ -361,7 +361,7 @@
                   <input
                     v-model="enableShadow"
                     type="checkbox"
-                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    class="size-4 rounded border-gray-300"
                   />
                   <span class="text-sm text-gray-700">Text Shadow</span>
                 </label>
@@ -369,7 +369,7 @@
                   <input
                     v-model="enableStroke"
                     type="checkbox"
-                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    class="size-4 rounded border-gray-300"
                   />
                   <span class="text-sm text-gray-700">Text Stroke</span>
                 </label>
@@ -381,7 +381,7 @@
 
       <!-- Preview -->
       <div class="space-y-6">
-        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div class="card p-6">
           <h3 class="font-semibold text-gray-900 mb-4">Preview</h3>
 
           <div class="relative bg-checkerboard rounded-lg overflow-hidden">
@@ -401,7 +401,7 @@
               >
               <select
                 v-model="exportFormat"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="input"
               >
                 <option value="png">PNG (Transparent)</option>
                 <option value="jpg">JPG (No transparency)</option>

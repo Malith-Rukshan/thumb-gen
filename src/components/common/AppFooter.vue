@@ -1,129 +1,112 @@
 <template>
-  <footer
-    class="relative z-20 mt-auto border-t border-gray-200 bg-white/80 backdrop-blur-sm"
-  >
-    <div class="container mx-auto px-4 py-8">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+  <footer class="relative z-20 mt-auto border-t border-gray-200/70 bg-white/70 backdrop-blur-xl">
+    <div class="container mx-auto px-4 py-12">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-10">
         <!-- About -->
-        <div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">
-            About ThumbGen
-          </h3>
-          <p class="text-sm text-gray-600">
+        <div class="md:col-span-2 max-w-sm">
+          <router-link to="/" class="inline-flex items-center gap-2.5 mb-4">
+            <img src="/logo.png" alt="" class="w-7 h-7" draggable="false" />
+            <span class="text-lg font-bold tracking-tight text-gray-900">
+              Thumb<span class="text-gradient">Gen</span>
+            </span>
+          </router-link>
+          <p class="text-sm text-gray-600 leading-relaxed">
             A modern, browser-based tool for generating thumbnails from videos,
             animations, images, and text. 100% client-side processing ensures
             your privacy.
           </p>
         </div>
 
-        <!-- Features -->
+        <!-- Tools -->
         <div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Features</h3>
-          <ul class="space-y-2 text-sm text-gray-600">
-            <li class="flex items-center gap-2">
-              <CheckIcon class="w-4 h-4 text-blue-600" />
-              <a
-                href="/video-thumbnail-generator"
-                class="hover:text-blue-600 transition-colors"
+          <h3 class="text-sm font-semibold text-gray-900 mb-4">Tools</h3>
+          <ul class="space-y-2.5 text-sm">
+            <li v-for="tool in tools" :key="tool.to">
+              <router-link
+                :to="tool.to"
+                class="text-gray-600 hover:text-blue-600 transition-colors"
               >
-                Video frame extraction
-              </a>
-            </li>
-            <li class="flex items-center gap-2">
-              <CheckIcon class="w-4 h-4 text-blue-600" />
-              <a
-                href="/lottie-thumbnail-generator"
-                class="hover:text-blue-600 transition-colors"
-              >
-                Lottie/TGS support
-              </a>
-            </li>
-            <li class="flex items-center gap-2">
-              <CheckIcon class="w-4 h-4 text-blue-600" />
-              <a
-                href="/base64-image-converter"
-                class="hover:text-blue-600 transition-colors"
-              >
-                Base64 conversion
-              </a>
-            </li>
-            <li class="flex items-center gap-2">
-              <CheckIcon class="w-4 h-4 text-blue-600" />
-              <a
-                href="/watermark-tool"
-                class="hover:text-blue-600 transition-colors"
-              >
-                Custom watermarks
-              </a>
+                {{ tool.label }}
+              </router-link>
             </li>
           </ul>
         </div>
 
         <!-- Links -->
         <div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Links</h3>
-          <div class="flex flex-col space-y-2">
-            <a
-              href="https://github.com/Malith-Rukshan/thumb-gen"
-              target="_blank"
-              class="text-sm text-gray-600 hover:text-blue-600 transition-colors inline-flex items-center gap-1"
-            >
-              <GithubIcon class="w-4 h-4" />
-              GitHub Repository
-            </a>
-            <a
-              href="https://malith.dev"
-              target="_blank"
-              class="text-sm text-gray-600 hover:text-blue-600 transition-colors inline-flex items-center gap-1"
-            >
-              <UserIcon class="w-4 h-4" />
-              Developer Profile
-            </a>
-            <a
-              href="https://github.com/Malith-Rukshan/thumb-gen/issues"
-              target="_blank"
-              class="text-sm text-gray-600 hover:text-blue-600 transition-colors inline-flex items-center gap-1"
-            >
-              <MessageSquareIcon class="w-4 h-4" />
-              Report an Issue
-            </a>
-          </div>
+          <h3 class="text-sm font-semibold text-gray-900 mb-4">Links</h3>
+          <ul class="space-y-2.5 text-sm">
+            <li>
+              <a
+                href="https://github.com/Malith-Rukshan/thumb-gen"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-gray-600 hover:text-blue-600 transition-colors inline-flex items-center gap-2"
+              >
+                <GithubIcon class="w-4 h-4" />
+                GitHub Repository
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://malith.dev"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-gray-600 hover:text-blue-600 transition-colors inline-flex items-center gap-2"
+              >
+                <UserIcon class="w-4 h-4" />
+                Developer Profile
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://github.com/Malith-Rukshan/thumb-gen/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-gray-600 hover:text-blue-600 transition-colors inline-flex items-center gap-2"
+              >
+                <MessageSquareIcon class="w-4 h-4" />
+                Report an Issue
+              </a>
+            </li>
+          </ul>
         </div>
       </div>
 
       <!-- Bottom bar -->
-      <div class="mt-8 pt-8 border-t border-gray-200">
+      <div class="mt-10 pt-6 border-t border-gray-200/70">
         <div
-          class="flex flex-col md:flex-row justify-between items-center gap-4"
+          class="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-600"
         >
-          <p class="text-sm text-gray-600">
+          <p class="inline-flex items-center gap-1">
             © {{ currentYear }} ThumbGen. Made with
-            <HeartIcon class="w-4 h-4 inline text-red-500" />
+            <HeartIcon class="w-4 h-4 text-rose-500 fill-rose-500" />
             by
             <a
               href="https://github.com/Malith-Rukshan"
               target="_blank"
-              class="text-blue-600 hover:underline"
+              rel="noopener noreferrer"
+              class="font-medium text-gray-900 hover:text-blue-600 transition-colors"
             >
               Malith Rukshan
             </a>
           </p>
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-3">
             <router-link
               to="/privacy-policy"
-              class="text-sm text-gray-600 hover:text-blue-600 transition-colors"
+              class="hover:text-blue-600 transition-colors"
             >
               Privacy Policy
             </router-link>
-            <span class="text-sm text-gray-500">•</span>
-            <span class="text-sm text-gray-600">
-              Open Source •
-              <a
-                href="https://github.com/Malith-Rukshan/thumb-gen/blob/main/LICENSE"
-                target="_blank"
-                >MIT License</a
-              >
-            </span>
+            <span class="text-gray-300">•</span>
+            <a
+              href="https://github.com/Malith-Rukshan/thumb-gen/blob/main/LICENSE"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="hover:text-blue-600 transition-colors"
+            >
+              MIT License
+            </a>
           </div>
         </div>
       </div>
@@ -132,14 +115,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-import {
-  CheckIcon,
-  UserIcon,
-  MessageSquareIcon,
-  HeartIcon,
-} from "@lucide/vue";
+import { UserIcon, MessageSquareIcon, HeartIcon } from "@lucide/vue";
 import GithubIcon from "@/components/icons/GithubIcon.vue";
+import { tools } from "@/tools";
 
-const currentYear = computed(() => new Date().getFullYear());
+const currentYear = new Date().getFullYear();
 </script>

@@ -1,14 +1,11 @@
 <template>
   <button
-    :class="[
-      'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2',
-      variantClasses,
-      sizeClasses,
-      $attrs.class,
-    ]"
+    :type="type"
+    :class="['btn', variantClasses, sizeClasses]"
     :disabled="disabled || loading"
+    :aria-busy="loading || undefined"
   >
-    <LoadingSpinner v-if="loading" class="w-4 h-4 mr-2" />
+    <LoadingSpinner v-if="loading" size="sm" />
     <slot />
   </button>
 </template>
@@ -18,8 +15,9 @@ import { computed } from "vue";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 
 interface Props {
-  variant?: "primary" | "secondary" | "ghost" | "danger";
+  variant?: "primary" | "secondary" | "ghost" | "danger" | "success";
   size?: "sm" | "md" | "lg";
+  type?: "button" | "submit" | "reset";
   disabled?: boolean;
   loading?: boolean;
 }
@@ -27,28 +25,18 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   variant: "primary",
   size: "md",
+  type: "button",
   disabled: false,
   loading: false,
 });
 
-const variantClasses = computed(() => {
-  const classes = {
-    primary:
-      "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 disabled:bg-gray-300",
-    secondary:
-      "bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500",
-    ghost: "text-gray-700 hover:bg-gray-100 focus:ring-gray-500",
-    danger:
-      "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 disabled:bg-gray-300",
-  };
-  return classes[props.variant];
-});
+const variantClasses = computed(() => `btn-${props.variant}`);
 
 const sizeClasses = computed(() => {
   const classes = {
-    sm: "px-3 py-1.5 text-sm",
-    md: "px-4 py-2 text-base",
-    lg: "px-6 py-3 text-lg",
+    sm: "btn-sm",
+    md: "",
+    lg: "btn-lg",
   };
   return classes[props.size];
 });

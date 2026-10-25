@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <!-- Header Section -->
     <div class="space-y-4 mb-8">
-      <h2 class="text-3xl font-bold text-gray-900">
+      <h2 class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
         Video Thumbnail Generator
       </h2>
       <p class="text-lg text-gray-600 leading-relaxed">
@@ -11,7 +11,7 @@
       </p>
 
       <!-- Use Cases -->
-      <div class="bg-blue-50 rounded-lg p-4 space-y-2">
+      <div class="rounded-2xl p-5 space-y-2 bg-linear-to-br from-blue-50 to-indigo-50/70 ring-1 ring-blue-100">
         <h3 class="font-semibold text-gray-900 flex items-center gap-2">
           <svg
             class="w-5 h-5 text-blue-600"
@@ -161,7 +161,7 @@
                   </span>
                   <button
                     @click.stop="removeFrame(frame.id)"
-                    class="p-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                    class="btn btn-danger !rounded-md p-1"
                   >
                     <TrashIcon class="w-3 h-3" />
                   </button>
@@ -180,7 +180,7 @@
         </div>
 
         <!-- Export Options -->
-        <div class="mt-6 p-6 bg-gray-50 rounded-lg space-y-4">
+        <div class="mt-6 p-6 bg-gray-50/80 rounded-2xl ring-1 ring-gray-200/70 space-y-4">
           <h4 class="text-base font-medium text-gray-900">Export Options</h4>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -191,7 +191,7 @@
               </label>
               <select
                 v-model="exportOptions.format"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input"
               >
                 <option value="png">PNG</option>
                 <option value="jpg">JPG</option>
@@ -221,7 +221,7 @@
               </label>
               <select
                 v-model="exportSize"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input"
               >
                 <option value="original">Original</option>
                 <option value="1920x1080">1920×1080 (Full HD)</option>
@@ -243,7 +243,7 @@
                 type="number"
                 min="1"
                 max="4096"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input"
               />
             </div>
             <div>
@@ -255,7 +255,7 @@
                 type="number"
                 min="1"
                 max="4096"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input"
               />
             </div>
           </div>
@@ -265,7 +265,7 @@
             <button
               @click="exportSelectedFrames"
               :disabled="selectedFrames.length === 0 || isExporting"
-              class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-2"
+              class="btn btn-primary"
             >
               <DownloadIcon class="w-4 h-4" />
               Export Selected ({{ selectedFrames.length }})
@@ -273,7 +273,7 @@
             <button
               @click="exportAllFrames"
               :disabled="capturedFrames.length === 0 || isExporting"
-              class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-2"
+              class="btn btn-secondary"
             >
               <DownloadIcon class="w-4 h-4" />
               Export All

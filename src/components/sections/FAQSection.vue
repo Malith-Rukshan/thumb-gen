@@ -2,22 +2,24 @@
   <section id="faq" class="py-16">
     <div class="container mx-auto px-4 max-w-4xl">
       <div class="text-center mb-12">
-        <a class="text-3xl lg:text-4xl font-bold text-gray-900" href="#faq">
-          Frequently Asked Questions
-        </a>
+        <h2 class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
+          <a href="#faq">Frequently Asked Questions</a>
+        </h2>
         <p class="text-lg text-gray-600 mt-4">
           Everything you need to know about ThumbGen
         </p>
       </div>
 
-      <div class="space-y-4">
+      <div class="space-y-3">
         <div
           v-for="(item, index) in faqItems"
           :key="index"
-          class="bg-white rounded-lg shadow-sm border border-gray-100"
+          class="card overflow-hidden"
         >
           <button
+            type="button"
             @click="toggleItem(index)"
+            :aria-expanded="openItems.includes(index)"
             class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
           >
             <span class="font-semibold text-gray-900">{{ item.question }}</span>
@@ -40,7 +42,8 @@
         <a
           href="https://github.com/Malith-Rukshan/thumb-gen/issues"
           target="_blank"
-          class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          rel="noopener noreferrer"
+          class="btn btn-primary btn-lg"
         >
           <MessageSquareIcon class="w-5 h-5" />
           Ask on GitHub
