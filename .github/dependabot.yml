@@ -1,0 +1,56 @@
+# Dependency updates, tuned to stay quiet:
+# - checks once a week, and only opens a PR when something actually changed
+# - all minor/patch bumps land in ONE grouped PR, auto-merged by CI once tests pass
+# - major bumps are grouped into a separate PR that waits for a human review
+# - cooldown skips brand-new releases so broken versions get yanked before we pick them up
+version: 2
+updates:
+  - package-ecosystem: bun
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Colombo
+    cooldown:
+      default-days: 3
+      semver-major-days: 14
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: deps
+    labels:
+      - dependencies
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+      major:
+        update-types:
+          - major
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: ci
+    labels:
+      - dependencies
+    groups:
+      actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: docker
+    labels:
+      - dependencies
+    groups:
+      docker-images:
+        patterns:
+          - "*"

@@ -1,93 +1,104 @@
-name: CI/CD Pipeline
+name: CI
 
 on:
   push:
-    branches: [ main, develop ]
-    paths:
-      - 'src/**'
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
   pull_request:
-    branches: [ main ]
-    paths:
-      - 'src/**'
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   test:
+    name: Type check, test & build
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
+
+      # Vitest 5 / Vite 8 need Node >= 22.12
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version-file: package.json
 
       - name: Install dependencies
-        run: bun install
+        run: bun install --frozen-lockfile
 
-      - name: Run type check
+      - name: Type check
         run: bun run type-check
 
       - name: Run tests
         run: bun run test:run
 
-      - name: Build project
+      - name: Build
         run: bun run build
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-files
           path: dist/
+          retention-days: 7
 
-  build-docker:
+  docker:
+    name: Docker build
     runs-on: ubuntu-latest
     needs: test
-    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build Docker image (no push)
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: .
-          file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64
           push: false
           tags: thumb-gen:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  deploy-preview:
+  # Merges Dependabot's grouped minor/patch PRs once everything above is green.
+  # Major updates are left open for manual review.
+  dependabot-automerge:
+    name: Auto-merge Dependabot PR
     runs-on: ubuntu-latest
-    needs: test
-    if: github.event_name == 'pull_request'
+    needs: [test, docker]
+    if: github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]'
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Fetch Dependabot metadata
+        id: meta
+        uses: dependabot/fetch-metadata@v3
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Install dependencies
-        run: bun install
-
-      - name: Build project
-        run: bun run build
-
-      - name: Deploy to Vercel Preview
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          github-comment: true
+      - name: Merge minor and patch updates
+        if: steps.meta.outputs.update-type != 'version-update:semver-major'
+        run: gh pr merge --squash --delete-branch "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

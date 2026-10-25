@@ -1,32 +1,25 @@
-# Use the official Bun image
-FROM oven/bun:latest as builder
+# Build stage
+FROM oven/bun:1.3.14-alpine AS builder
 
-# Set the working directory
 WORKDIR /app
 
-# Copy package files
-COPY package.json bun.lock* ./
-
-# Install dependencies
+# Install dependencies first for better layer caching
+COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 
-# Copy source code
 COPY . .
-
-# Build the application
 RUN bun run build
 
 # Production stage
-FROM nginx:alpine
+FROM nginx:1.30.6-alpine
 
-# Copy built assets from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Copy nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Expose port 80
 EXPOSE 80
 
-# Start nginx
+# nginx:alpine ships wget (busybox) but not curl
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -qO- http://127.0.0.1/health || exit 1
+
 CMD ["nginx", "-g", "daemon off;"]
