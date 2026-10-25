@@ -119,5 +119,5 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeftIcon } from "lucide-vue-next";
+import { ArrowLeftIcon } from "@lucide/vue";
 </script>

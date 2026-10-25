@@ -52,7 +52,7 @@ beforeAll(() => {
   global.URL.revokeObjectURL = vi.fn();
 
   // Mock FileReader
-  global.FileReader = vi.fn(() => {
+  global.FileReader = vi.fn(function () {
     const reader = {
       onload: null as any,
       onerror: null as any,
@@ -70,7 +70,7 @@ beforeAll(() => {
   }) as any;
 
   // Mock Image
-  global.Image = vi.fn(() => {
+  global.Image = vi.fn(function () {
     const img = {
       onload: null as any,
       onerror: null as any,

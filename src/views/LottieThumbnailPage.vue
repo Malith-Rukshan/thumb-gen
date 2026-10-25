@@ -13,6 +13,6 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeftIcon } from "lucide-vue-next";
+import { ArrowLeftIcon } from "@lucide/vue";
 import LottieThumbnailGenerator from "@/components/generators/LottieThumbnail/LottieThumbnailGenerator.vue";
 </script>

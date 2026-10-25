@@ -135,11 +135,11 @@
 import { computed } from "vue";
 import {
   CheckIcon,
-  GithubIcon,
   UserIcon,
   MessageSquareIcon,
   HeartIcon,
-} from "lucide-vue-next";
+} from "@lucide/vue";
+import GithubIcon from "@/components/icons/GithubIcon.vue";
 
 const currentYear = computed(() => new Date().getFullYear());
 </script>

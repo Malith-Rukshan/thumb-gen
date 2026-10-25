@@ -185,7 +185,7 @@ import {
   CirclePlayIcon,
   TypeIcon,
   DropletIcon,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 import FeaturesSection from "@/components/sections/FeaturesSection.vue";
 import FAQSection from "@/components/sections/FAQSection.vue";
 </script>

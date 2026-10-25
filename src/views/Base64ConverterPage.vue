@@ -13,6 +13,6 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeftIcon } from "lucide-vue-next";
+import { ArrowLeftIcon } from "@lucide/vue";
 import Base64Generator from "@/components/generators/ImageBase64/Base64Generator.vue";
 </script>

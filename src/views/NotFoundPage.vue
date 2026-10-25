@@ -78,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import { FileQuestion, Home, ArrowLeft } from "lucide-vue-next";
+import { FileQuestion, Home, ArrowLeft } from "@lucide/vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();

@@ -164,7 +164,7 @@ import {
   ChevronRightIcon,
   SkipBackIcon,
   SkipForwardIcon,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 import { formatDuration } from "@/utils/fileHelpers";
 import type { LottieFrame } from "@/types";

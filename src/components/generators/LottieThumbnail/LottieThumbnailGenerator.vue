@@ -424,8 +424,8 @@ import {
   CheckIcon,
   TrashIcon,
   DownloadIcon,
-} from "lucide-vue-next";
-import pako from "pako";
+} from "@lucide/vue";
+import { inflate } from "pako";
 import DropZone from "@/components/common/DropZone.vue";
 import LottiePlayer from "./LottiePlayer.vue";
 import {
@@ -482,7 +482,7 @@ async function handleFileUpload(files: File[]) {
     if (file.name.endsWith(".tgs")) {
       // Handle TGS (gzipped Lottie)
       const arrayBuffer = await file.arrayBuffer();
-      const inflated = pako.inflate(new Uint8Array(arrayBuffer));
+      const inflated = inflate(new Uint8Array(arrayBuffer));
       const text = new TextDecoder().decode(inflated);
       data = JSON.parse(text);
     } else {
@@ -513,7 +513,7 @@ async function handleAnimationUrl(url: string) {
     ) {
       // Handle TGS
       const arrayBuffer = await response.arrayBuffer();
-      const inflated = pako.inflate(new Uint8Array(arrayBuffer));
+      const inflated = inflate(new Uint8Array(arrayBuffer));
       const text = new TextDecoder().decode(inflated);
       data = JSON.parse(text);
     } else {

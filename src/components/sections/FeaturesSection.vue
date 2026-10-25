@@ -187,8 +187,8 @@ import {
   ZapIcon,
   FileStackIcon,
   LayersIcon,
-  GithubIcon,
-} from "lucide-vue-next";
+} from "@lucide/vue";
+import GithubIcon from "@/components/icons/GithubIcon.vue";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 
 // Base64 placeholder (tiny 4x3 image)

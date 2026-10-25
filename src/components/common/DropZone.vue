@@ -91,7 +91,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import type { Component } from "vue";
-import { LinkIcon } from "lucide-vue-next";
+import { LinkIcon } from "@lucide/vue";
 import LoadingSpinner from "./LoadingSpinner.vue";
 
 const props = withDefaults(

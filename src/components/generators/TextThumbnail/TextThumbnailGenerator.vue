@@ -338,9 +338,9 @@
               >
               <div class="flex gap-2">
                 <button
-                  v-for="align in ['left', 'center', 'right']"
+                  v-for="align in textAlignOptions"
                   :key="align"
-                  @click="textAlign = align as typeof textAlign.value"
+                  @click="textAlign = align"
                   :class="[
                     'flex-1 py-2 rounded-lg transition-colors',
                     textAlign === align
@@ -455,7 +455,7 @@ import {
   PaletteIcon,
   ImageIcon,
   DownloadIcon,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 import DropZone from "@/components/common/DropZone.vue";
 import Button from "@/components/ui/Button.vue";
 
@@ -480,7 +480,9 @@ const fontSize = ref(72);
 const lineHeight = ref(1.2);
 const textColor = ref("#ffffff");
 const fontWeight = ref("bold");
-const textAlign = ref<"left" | "center" | "right">("center");
+type TextAlign = "left" | "center" | "right";
+const textAlignOptions: TextAlign[] = ["left", "center", "right"];
+const textAlign = ref<TextAlign>("center");
 const enableShadow = ref(true);
 const enableStroke = ref(false);
 

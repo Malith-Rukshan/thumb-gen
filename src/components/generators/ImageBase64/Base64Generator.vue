@@ -252,7 +252,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
-import { ImageIcon, XIcon, CopyIcon } from "lucide-vue-next";
+import { ImageIcon, XIcon, CopyIcon } from "@lucide/vue";
 import DropZone from "@/components/common/DropZone.vue";
 import { formatFileSize } from "@/utils/fileHelpers";
 import { createCanvas } from "@/utils/canvas";

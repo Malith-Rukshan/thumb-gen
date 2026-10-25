@@ -303,7 +303,7 @@ import {
   CheckIcon,
   TrashIcon,
   DownloadIcon,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 import DropZone from "@/components/common/DropZone.vue";
 import VideoPlayer from "./VideoPlayer.vue";
 import {

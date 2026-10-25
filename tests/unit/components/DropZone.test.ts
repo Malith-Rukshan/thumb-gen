@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import DropZone from '@/components/common/DropZone.vue'
-import { ImageIcon } from 'lucide-vue-next'
+import { ImageIcon } from '@lucide/vue'
 
 describe('DropZone', () => {
   it('renders properly with default props', () => {

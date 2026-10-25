@@ -52,7 +52,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { ChevronDownIcon, MessageSquareIcon } from "lucide-vue-next";
+import { ChevronDownIcon, MessageSquareIcon } from "@lucide/vue";
 
 const openItems = ref<number[]>([0]); // First item open by default
 

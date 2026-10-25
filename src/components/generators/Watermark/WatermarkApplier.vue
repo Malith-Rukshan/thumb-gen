@@ -401,11 +401,10 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, nextTick } from "vue";
-import { DropletIcon, ImageIcon, DownloadIcon } from "lucide-vue-next";
+import { DropletIcon, ImageIcon, DownloadIcon } from "@lucide/vue";
 import DropZone from "@/components/common/DropZone.vue";
 import Button from "@/components/ui/Button.vue";
 import { formatFileSize } from "@/utils/fileHelpers";
-import JSZip from "jszip";
 
 interface UploadedImage {
   name: string;
@@ -698,6 +697,7 @@ const downloadCurrentImage = () => {
 };
 
 const downloadAllImages = async () => {
+  const JSZip = (await import("jszip")).default;
   const zip = new JSZip();
 
   for (let i = 0; i < uploadedImages.value.length; i++) {
